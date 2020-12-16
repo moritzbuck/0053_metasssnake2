@@ -17,6 +17,11 @@ assembly_fields =  {
     'length_cutoff' : {
     'type' : int,
     'default' : 2500,
+    'min' : 0,
+    },
+    'seqio_buffer' : {
+    'type' : int,
+    'default' : 1000,
     'min' : 0
     }
 }

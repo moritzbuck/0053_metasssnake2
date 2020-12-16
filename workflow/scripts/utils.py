@@ -2,6 +2,7 @@ from workflow.scripts.hard_config import assembly_fields, loglinelen, libraries_
 from datetime import datetime
 from math import floor, ceil
 from sys import stderr
+import subprocess
 
 def is_type(s, typ):
     try:
@@ -11,6 +12,7 @@ def is_type(s, typ):
         return False
 
 def validate_field(value, validator, name):
+
     if not validator:
         return value
     if not value:
@@ -76,6 +78,10 @@ def validate_description_json(file_or_dict):
     except Exception as err:
         print("ERROR : Something unexpected went wrong, so your probably not valid\nERROR {err}\nERROR Check the doc for formating advice".format(err = err), file = sys.stderr)
         return None
+
+    if os.path.exists(".git"):
+        config_dat['git_commit'] = subprocess.check_output(['git', 'log']).decode().split()[1]
+
     return config_dat
 
 def title2log(title, logfile, llen = loglinelen, also_stderr = True) :

@@ -59,10 +59,10 @@ rule assembly:
         megahit_log = "{root}/assemblies/{ass_name}/logs/megahit.log",
         log = "{root}/assemblies/{ass_name}/logs/{ass_name}.log",
         env = "{root}/assemblies/{ass_name}/logs/assembly.yaml",
-        settings = "{root}/assemblies/{ass_name}/logs/megahit_settings.json"
+        settings = "{root}/assemblies/{ass_name}/logs/assembly_settings.json"
     threads : 24
     params : script = "workflow/scripts/assemble.py", config_file = pjoin(config['root_folder'],config['config_file'])
-    conda : "../envs/sortmerna.yaml"
+    conda : "../envs/assembly.yaml"
     shell : """
-        python {params.script} {wildcards.ass_name} {params.config_file} {wildcards.root} {wildcards.root}/libraries/{wildcards.ass_name}/ {threads}
+        python {params.script} {wildcards.ass_name} {params.config_file} {wildcards.root} {wildcards.root}/assemblies/{wildcards.ass_name}/ {threads}
         """
