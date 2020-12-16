@@ -1,0 +1,8 @@
+name: metasssnake2
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - snakemake
+  - tqdm

@@ -1,0 +1,10 @@
+name: library_processing
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - fastp
+  - khmer
+  - sourmash
+  - bbmap
