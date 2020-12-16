@@ -1,0 +1,638 @@
+{
+    "root_folder" : "/home/moritz/data/merclub/",
+    "temp_folder" : "/home/moritz/temp/",
+    "config_file" : "/home/moritz/projects/0055_merclub/merclub.json",
+    "assemblies" : {
+      	"full_coassembly" : {
+      	    "libraries" : ["DNA_BCN4-A",
+                           "DNA_BCN4-B",
+                           "DNA_BCN4-C",
+                           "DNA_CS14-1",
+                           "DNA_CS14-2",
+                           "DNA_CS14-3",
+                           "DNA_CS3-1",
+                           "DNA_CS3-2",
+                           "DNA_CS3-3",
+                           "DNA_CS4-1",
+                           "DNA_CS4-2",
+                           "DNA_CS4-3",
+                           "DNA_CS7-1",
+                           "DNA_CS7-2",
+                           "DNA_CS7-3",
+                           "DNA_EN15-1",
+                           "DNA_EN15-2",
+                           "DNA_EN15-3",
+                           "DNA_EN17-1",
+                           "DNA_EN17-2",
+                           "DNA_EN17-3",
+                           "DNA_ENASUA-1",
+                           "DNA_ENASUA-2",
+                           "DNA_ENASUA-3",
+                           "DNA_ENAXPE-1",
+                           "DNA_ENAXPE-2",
+                           "DNA_ENAXPE-3",
+                           "DNA_KPH0to2cm-1",
+                           "DNA_KPH0to2cm-2",
+                           "DNA_KPH0to2cm-3"],
+      	    "bin_mapping" : ["DNA_BCN4-A",
+                             "DNA_BCN4-B",
+                             "DNA_BCN4-C",
+                             "DNA_CS14-1",
+                             "DNA_CS14-2",
+                             "DNA_CS14-3",
+                             "DNA_CS3-1",
+                             "DNA_CS3-2",
+                             "DNA_CS3-3",
+                             "DNA_CS4-1",
+                             "DNA_CS4-2",
+                             "DNA_CS4-3",
+                             "DNA_CS7-1",
+                             "DNA_CS7-2",
+                             "DNA_CS7-3",
+                             "DNA_EN15-1",
+                             "DNA_EN15-2",
+                             "DNA_EN15-3",
+                             "DNA_EN17-1",
+                             "DNA_EN17-2",
+                             "DNA_EN17-3",
+                             "DNA_ENASUA-1",
+                             "DNA_ENASUA-2",
+                             "DNA_ENASUA-3",
+                             "DNA_ENAXPE-1",
+                             "DNA_ENAXPE-2",
+                             "DNA_ENAXPE-3",
+                             "DNA_KPH0to2cm-1",
+                             "DNA_KPH0to2cm-2",
+                             "DNA_KPH0to2cm-3"],
+      	    "assembler" : "megahit",
+      	    "preprocess" : "none",
+      	    "length_cutoff" : 1500
+      	},
+        "test_ass" : {
+            "libraries" : ["test_DNA1"],
+            "bin_mapping" : ["test_DNA1", "test_DNA2", "test_DNA3"],
+            "assembler" : "megahit",
+            "preprocess" : "none",
+            "length_cutoff" : 300
+        },
+        "test_coass" : {
+            "libraries" : ["test_DNA1", "test_DNA2", "test_DNA3"],
+            "bin_mapping" : ["test_DNA1", "test_DNA2", "test_DNA3"],
+            "assembler" : "megahit",
+            "preprocess" : "none",
+            "length_cutoff" : 300
+  }
+},
+  "libraries" : {
+                  "test_DNA1": {
+                      "fwd": [
+                          "../raw_data/haiyan/test/test_DNA1_R1.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/test/test_DNA1_R2.fastq.gz"
+                      ],
+                      "unp": ["../raw_data/haiyan/test/test_DNA1_unp.fastq.gz"]
+                  },
+                  "test_DNA2": {
+                      "fwd": [
+                          "../raw_data/haiyan/test/test_DNA2_R1.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/test/test_DNA2_R2.fastq.gz"
+                      ],
+                      "unp": ["../raw_data/haiyan/test/test_DNA2_unp.fastq.gz"]
+                  },
+                  "test_DNA3": {
+                      "fwd": [
+                          "../raw_data/haiyan/test/test_DNA3_R1.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/test/test_DNA3_R2.fastq.gz"
+                      ],
+                      "unp": ["../raw_data/haiyan/test/test_DNA3_unp.fastq.gz"]
+                  },
+                  "DNA_BCN4-A": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-BCN4-A/TJ-2707-BCN4-A_S179_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-BCN4-A/TJ-2707-BCN4-A_S179_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_BCN4-B": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-BCN4-B/TJ-2707-BCN4-B_S177_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-BCN4-B/TJ-2707-BCN4-B_S177_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_BCN4-C": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-BCN4-C/TJ-2707-BCN4-C_S178_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-BCN4-C/TJ-2707-BCN4-C_S178_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS14-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS14-1/TJ-2707-CS14-1_S192_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS14-1/TJ-2707-CS14-1_S192_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS14-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS14-2/TJ-2707-CS14-2_S193_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS14-2/TJ-2707-CS14-2_S193_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS14-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS14-3/TJ-2707-CS14-3_S194_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS14-3/TJ-2707-CS14-3_S194_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS3-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS3-1/TJ-2707-CS3-1_S195_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS3-1/TJ-2707-CS3-1_S195_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS3-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS3-2/TJ-2707-CS3-2_S196_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS3-2/TJ-2707-CS3-2_S196_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS3-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS3-3/TJ-2707-CS3-3_S197_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS3-3/TJ-2707-CS3-3_S197_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS4-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS4-1/TJ-2707-CS4-1_S198_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS4-1/TJ-2707-CS4-1_S198_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS4-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS4-2/TJ-2707-CS4-2_S199_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS4-2/TJ-2707-CS4-2_S199_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS4-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS4-3/TJ-2707-CS4-3_S200_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS4-3/TJ-2707-CS4-3_S200_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS7-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS7-1/TJ-2707-CS7-1_S201_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS7-1/TJ-2707-CS7-1_S201_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS7-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS7-2/TJ-2707-CS7-2_S202_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS7-2/TJ-2707-CS7-2_S202_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_CS7-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS7-3/TJ-2707-CS7-3_S203_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-CS7-3/TJ-2707-CS7-3_S203_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_EN15-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN15-1/TJ-2707-EN15-1_S180_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN15-1/TJ-2707-EN15-1_S180_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_EN15-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN15-2/TJ-2707-EN15-2_S181_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN15-2/TJ-2707-EN15-2_S181_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_EN15-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN15-3/TJ-2707-EN15-3_S182_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN15-3/TJ-2707-EN15-3_S182_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_EN17-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN17-1/TJ-2707-EN17-1_S183_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN17-1/TJ-2707-EN17-1_S183_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_EN17-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN17-2/TJ-2707-EN17-2_S184_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN17-2/TJ-2707-EN17-2_S184_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_EN17-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN17-3/TJ-2707-EN17-3_S185_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-EN17-3/TJ-2707-EN17-3_S185_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_ENASUA-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENASUA-1/TJ-2707-ENASUA-1_S186_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENASUA-1/TJ-2707-ENASUA-1_S186_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_ENASUA-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENASUA-2/TJ-2707-ENASUA-2_S187_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENASUA-2/TJ-2707-ENASUA-2_S187_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_ENASUA-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENASUA-3/TJ-2707-ENASUA-3_S188_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENASUA-3/TJ-2707-ENASUA-3_S188_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_ENAXPE-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENAXPE-1/TJ-2707-ENAXPE-1_S189_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENAXPE-1/TJ-2707-ENAXPE-1_S189_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_ENAXPE-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENAXPE-2/TJ-2707-ENAXPE-2_S190_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENAXPE-2/TJ-2707-ENAXPE-2_S190_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_ENAXPE-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENAXPE-3/TJ-2707-ENAXPE-3_S191_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-ENAXPE-3/TJ-2707-ENAXPE-3_S191_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_KPH0to2cm-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-KPH0to2cm-1/TJ-2707-KPH0to2cm-1_S204_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-KPH0to2cm-1/TJ-2707-KPH0to2cm-1_S204_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_KPH0to2cm-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-KPH0to2cm-2/TJ-2707-KPH0to2cm-2_S205_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-KPH0to2cm-2/TJ-2707-KPH0to2cm-2_S205_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "DNA_KPH0to2cm-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-KPH0to2cm-3/TJ-2707-KPH0to2cm-3_S206_L004_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2707/201127_A00181_0231_AHHWYYDSXY/Sample_TJ-2707-KPH0to2cm-3/TJ-2707-KPH0to2cm-3_S206_L004_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_BCN4-A": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-BCN4-A/TJ-2706-BCN4-A_S3_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-BCN4-A/TJ-2706-BCN4-A_S3_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "test": {
+                      "fwd": [
+                          "../raw_data/haiyan/test/test_R1.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/test/test_R2.fastq.gz"
+                      ],
+                      "unp": ["../raw_data/haiyan/test/test_unp.fastq.gz"]
+                  },
+                  "RNA_BCN4-B": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-BCN4-B/TJ-2706-BCN4-B_S1_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-BCN4-B/TJ-2706-BCN4-B_S1_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_BCN4-C": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-BCN4-C/TJ-2706-BCN4-C_S2_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-BCN4-C/TJ-2706-BCN4-C_S2_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_CS3-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS3-1/TJ-2706-CS3-1_S13_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS3-1/TJ-2706-CS3-1_S13_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_CS3-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS3-2/TJ-2706-CS3-2_S14_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS3-2/TJ-2706-CS3-2_S14_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_CS3-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS3-3/TJ-2706-CS3-3_S15_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS3-3/TJ-2706-CS3-3_S15_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_CS4-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS4-1/TJ-2706-CS4-1_S16_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS4-1/TJ-2706-CS4-1_S16_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_CS4-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS4-2/TJ-2706-CS4-2_S17_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS4-2/TJ-2706-CS4-2_S17_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_CS4-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS4-3/TJ-2706-CS4-3_S18_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS4-3/TJ-2706-CS4-3_S18_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_CS7-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS7-1/TJ-2706-CS7-1_S19_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS7-1/TJ-2706-CS7-1_S19_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_CS7-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS7-2/TJ-2706-CS7-2_S20_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS7-2/TJ-2706-CS7-2_S20_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_CS7-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS7-3/TJ-2706-CS7-3_S21_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-CS7-3/TJ-2706-CS7-3_S21_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_EN15-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-EN15-1/TJ-2706-EN15-1_S4_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-EN15-1/TJ-2706-EN15-1_S4_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_EN15-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-EN15-2/TJ-2706-EN15-2_S5_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-EN15-2/TJ-2706-EN15-2_S5_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_EN15-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-EN15-3/TJ-2706-EN15-3_S6_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-EN15-3/TJ-2706-EN15-3_S6_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_ENASUA-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENASUA-1/TJ-2706-ENASUA-1_S7_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENASUA-1/TJ-2706-ENASUA-1_S7_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_ENASUA-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENASUA-2/TJ-2706-ENASUA-2_S8_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENASUA-2/TJ-2706-ENASUA-2_S8_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_ENASUA-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENASUA-3/TJ-2706-ENASUA-3_S9_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENASUA-3/TJ-2706-ENASUA-3_S9_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_ENAXPE-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENAXPE-1/TJ-2706-ENAXPE-1_S10_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENAXPE-1/TJ-2706-ENAXPE-1_S10_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_ENAXPE-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENAXPE-2/TJ-2706-ENAXPE-2_S11_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENAXPE-2/TJ-2706-ENAXPE-2_S11_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_ENAXPE-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENAXPE-3/TJ-2706-ENAXPE-3_S12_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-ENAXPE-3/TJ-2706-ENAXPE-3_S12_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_KPH0to2cm-1": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-KPH0to2cm-1/TJ-2706-KPH0to2cm-1_S22_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-KPH0to2cm-1/TJ-2706-KPH0to2cm-1_S22_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_KPH0to2cm-2": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-KPH0to2cm-2/TJ-2706-KPH0to2cm-2_S23_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-KPH0to2cm-2/TJ-2706-KPH0to2cm-2_S23_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  },
+                  "RNA_KPH0to2cm-3": {
+                      "fwd": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-KPH0to2cm-3/TJ-2706-KPH0to2cm-3_S24_L001_R1_001.fastq.gz"
+                      ],
+                      "rev": [
+                          "../raw_data/haiyan/TJ-2706/201120_A00181_0226_AHGTMLDSXY/Sample_TJ-2706-KPH0to2cm-3/TJ-2706-KPH0to2cm-3_S24_L001_R2_001.fastq.gz"
+                      ],
+                      "unp": []
+                  }
+
+          },
+  "libraries_config" : {},
+  "rna-libraries" : [
+                "RNA_BCN4-A",
+                "RNA_BCN4-B",
+                "RNA_BCN4-C",
+                "RNA_CS3-1",
+                "RNA_CS3-2",
+                "RNA_CS3-3",
+                "RNA_CS4-1",
+                "RNA_CS4-2",
+                "RNA_CS4-3",
+                "RNA_CS7-1",
+                "RNA_CS7-2",
+                "RNA_CS7-3",
+                "RNA_EN15-1",
+                "RNA_EN15-2",
+                "RNA_EN15-3",
+                "RNA_ENASUA-1",
+                "RNA_ENASUA-2",
+                "RNA_ENASUA-3",
+                "RNA_ENAXPE-1",
+                "RNA_ENAXPE-2",
+                "RNA_ENAXPE-3",
+                "RNA_KPH0to2cm-1",
+                "RNA_KPH0to2cm-2",
+                "RNA_KPH0to2cm-3"
+              ]
+}
