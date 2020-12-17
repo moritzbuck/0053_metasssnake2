@@ -1,0 +1,10 @@
+name: binning
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - metabat2
+  - bwa-mem2
+  - samtools
+  - biopython

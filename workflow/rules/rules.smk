@@ -66,3 +66,20 @@ rule assembly:
     shell : """
         python {params.script} {wildcards.ass_name} {params.config_file} {wildcards.root} {wildcards.root}/assemblies/{wildcards.ass_name}/ {threads}
         """
+
+rule binning:
+    input : unpack(lambda wildcards :  [ "{root}/libraries/{lib_name}/{lib_name}_fwd.fastq.gz".format(root = wildcards.root, lib_name = lib) for lib in config['assemblies'][wildcards.ass_name]['bin_mapping'] ]),
+            "{root}/assemblies/{ass_name}/assembly.fna"
+    output :
+        assembly_by_bins = "{root}/assemblies/{ass_name}/binned_assembly.fna"
+    log :
+        binner_log = "{root}/assemblies/{ass_name}/logs/binner.log",
+        log = "{root}/assemblies/{ass_name}/logs/{ass_name}.log",
+        env = "{root}/assemblies/{ass_name}/logs/binning.yaml",
+        settings = "{root}/assemblies/{ass_name}/logs/binning_settings.json"
+    threads : 24
+    params : script = "workflow/scripts/binning.py", config_file = pjoin(config['root_folder'],config['config_file'])
+    conda : "../envs/binning.yaml"
+    shell : """
+        python {params.script} {wildcards.ass_name} {params.config_file} {wildcards.root} {wildcards.root}/assemblies/{wildcards.ass_name}/ {threads}
+        """
