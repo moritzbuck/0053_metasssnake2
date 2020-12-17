@@ -31,7 +31,7 @@ shutil.copy(pjoin(out_folder, "assembly.fna"), temp_folder)
 
 title2log("indexing assembly to temp_folder".format(ass_name = ass_name), logfile)
 
-call("bwa-mem2 index {temp}/assembly.fna".format(temp_folder), shell=True)
+call("bwa-mem2 index {temp}/assembly.fna".format(temp = temp_folder), shell=True)
 
 freetxt_line("Starting mappings", logfile)
 

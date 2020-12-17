@@ -35,7 +35,7 @@ for lib in config_file['assemblies'][ass_name]['libraries']:
     """.format(root_folder = root_folder, lname = lib, temp=temp_folder), shell=True)
 
 if config_file['assemblies'][ass_name]['preprocess'] == 'none':
-    megahit_line = "megahit -1 {temp}/fwd.fastq -2 {temp}/rev.fastq -r  {temp}/unp.fastq -t {threads} -o {temp}/assembly --min-contig-len {min_len} 2> {log}"
+    megahit_line = "megahit -m 0.8 -1 {temp}/fwd.fastq -2 {temp}/rev.fastq -r  {temp}/unp.fastq -t {threads} -o {temp}/assembly --min-contig-len {min_len} 2> {log}"
 else :
     print("Other preprocesssing then 'none' not implemented yet")
     system.exit(0)
