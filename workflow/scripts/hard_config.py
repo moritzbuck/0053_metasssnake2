@@ -1,32 +1,40 @@
-assembly_fields =  {
-    'libraries' : {
-        'type' : list
-    },
-    'bin_mapping' : {
-            'type' : list,
-            'default' : []
-    },
-    'assembler' : {
-        'possibles' : ['megahit'],
-        'default' : 'megahit'
-    },
-    'preprocess' : {
-    'possibles' : [ 'bbnorm', 'none' ],
-    'default' : 'none'
-    },
-    'length_cutoff' : {
-    'type' : int,
-    'default' : 2500,
-    'min' : 0,
-    },
-    'seqio_buffer' : {
+necessary_paths = ["raw_folder", "config_file", "libraries_file", "assemblies_file", "binnings_file", "binsets_file"]
+optional_library_fields = ['fwd', 'rev', 'unp', 'read_subset', 'sourmash_k', 'sourmash_scaled', 'sortmerna_refs']
+
+general_fields = {
+    'seqio_buffer_size' : {
     'type' : int,
     'default' : 1000,
+    'min' : 1,
+    },
+    'loglinelen' : {
+    'type' : int,
+    'default' : 90,
     'min' : 0
+    },
+    'other_parameters' : {
+    'type' : str,
+    'default' : ''
+    },
+    'temp_folder' : {
+    'str' : str,
+    'default' : '/tmp/'
     }
 }
 
 libraries_fields = {
+    'fwd' : {
+    'type' : str,
+    'default' : ""
+    },
+    'rev' : {
+    'type' : str,
+    'default' : ""
+    },
+    'unp' : {
+    'type' : str,
+    'default' : ""
+    },
     'read_subset' : {
     'type' : int,
     'default' : 100000,
@@ -43,16 +51,73 @@ libraries_fields = {
     'min' : 99
     },
     'sortmerna_refs' : {
-    'type' : list,
-    'default' : ["~/dbs/sortmerna/set5-database.fasta", "~/dbs/sortmerna/set6-database.fasta"]
+    'type' : str,
+    'default' : "~/dbs/sortmerna/set5-database.fasta;~/dbs/sortmerna/set6-database.fasta"
+    },
+    'other_parameters' : {
+    'type' : str,
+    'default' : {}
     }
 }
 
-rna_libraries = {
-'default' : [],
-'type' : list
+necessary_assemblies_fields = ['libraries']
+assemblies_fields =  {
+    'libraries' : {
+        'type' : str
+    },
+    'assembler' : {
+        'possibles' : ['megahit'],
+        'default' : 'megahit'
+    },
+    'preprocess' : {
+    'possibles' : [ 'bbnorm', 'none' ],
+    'default' : 'none'
+    },
+    'length_cutoff' : {
+    'type' : int,
+    'default' : 2500,
+    'min' : 0,
+    },
+    'other_parameters' : {
+    'type' : str,
+    'default' : ''
+    },
+    'keep_unpaired' : {
+    'type' : bool,
+    'default' : {}
+    }
 }
 
+necessary_binnings_fields = ['libraries', 'assemblies']
+binnings_fields =  {
+    'libraries' : {
+        'type' : str
+    },
+    'assemblies' : {
+        'type' : str
+    },
+    'binner' : {
+        'possibles' : ['metabat', 'vamb'],
+        'default' : 'metabat'
+    },
+    'min_bin_size' : {
+    'type' : int,
+    'default' : 500000,
+    'min' : 0,
+    },
+    'other_parameters' : {
+    'type' : str,
+    'default' : {}
+    }
+}
 
-
-loglinelen = 90
+necessary_binsets_fields = ['binnings']
+binsets_fields =  {
+    'binnings' : {
+        'type' : str
+    },
+    'other_parameters' : {
+        'type' : str,
+        'default' : {}
+    },
+}

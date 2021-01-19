@@ -1,7 +1,7 @@
 from os.path import join as pjoin
 
 rule library_processing:
-    input : unpack(lambda wildcards :  { k : [pjoin(config['root_folder'],vv) for vv in v] for k,v in config['libraries'][wildcards.lib_name].items()})
+    input : unpack(lambda wildcards :  [pjoin(config['raw_folder'],v) for v in config['libraries'][wildcards.lib_name]['fwd'] + config['libraries'][wildcards.lib_name]['rev'] + config['libraries'][wildcards.lib_name]['unp'] ])
     output :
         fwd = "{root}/libraries/{lib_name}/{lib_name}_fwd.fastq.gz",
         rev = "{root}/libraries/{lib_name}/{lib_name}_rev.fastq.gz",
@@ -68,18 +68,32 @@ rule assembly:
         """
 
 rule binning:
-    input : unpack(lambda wildcards :  [ "{root}/libraries/{lib_name}/{lib_name}_fwd.fastq.gz".format(root = wildcards.root, lib_name = lib) for lib in config['assemblies'][wildcards.ass_name]['bin_mapping'] ]),
-            "{root}/assemblies/{ass_name}/assembly.fna"
+    input : unpack(lambda wildcards :  [ "{root}/libraries/{lib_name}/{lib_name}_fwd.fastq.gz".format(root = wildcards.root, lib_name = lib) for lib in config['binnings'][wildcards.binning_name]['libraries'] ]),
+            unpack(lambda wildcards :  [ "{root}/assemblies/{ass}/assembly.fna".format(root = wildcards.root, ass = ass) for ass in config['binnings'][wildcards.binning_name]['assemblies'] ])
     output :
-        assembly_by_bins = "{root}/assemblies/{ass_name}/binned_assembly.fna"
+        assembly_by_bins = "{root}/binnings/{binning_name}/binned_assembly.fna"
     log :
-        binner_log = "{root}/assemblies/{ass_name}/logs/binner.log",
-        log = "{root}/assemblies/{ass_name}/logs/{ass_name}.log",
-        env = "{root}/assemblies/{ass_name}/logs/binning.yaml",
-        settings = "{root}/assemblies/{ass_name}/logs/binning_settings.json"
+        log = "{root}/binnings/{binning_name}/logs/binning.log",
+        env = "{root}/binnings/{binning_name}/logs/binning.yaml",
+        settings = "{root}/binnings/{binning_name}/logs/binning_settings.json"
     threads : 24
-    params : script = "workflow/scripts/binning.py", config_file = pjoin(config['root_folder'],config['config_file'])
+    params : script = "workflow/scripts/binning.py", config_file = config['config_file']
     conda : "../envs/binning.yaml"
     shell : """
-        python {params.script} {wildcards.ass_name} {params.config_file} {wildcards.root} {wildcards.root}/assemblies/{wildcards.ass_name}/ {threads}
+        python {params.script} {wildcards.binning_name} {params.config_file} {wildcards.root} {wildcards.root}/binnings/{wildcards.binning_name}/ {threads}
+        """
+
+rule binsetting:
+    input : unpack(lambda wildcards :  [ "{root}/binnings/{binning}/binned_assembly.fna".format(root = wildcards.root, binning = binning) for binning in config['binsets'][wildcards.binset_name]['binnings'] ])
+    output :
+        assembly_by_binset = "{root}/binsets/{binset_name}/binset.fna"
+    log :
+        log = "{root}/binset/{binset_name}/logs/binset.log",
+        env = "{root}/binnings/{binset_name}/logs/binset.yaml",
+        settings = "{root}/binnings/{binset_name}/logs/binset_settings.json"
+    threads : 24
+    params : script = "workflow/scripts/binset.py", config_file = config['config_file']
+    conda : "../envs/binset.yaml"
+    shell : """
+        python {params.script} {wildcards.binset_name} {params.config_file} {wildcards.root} {wildcards.root}/binnings/{wildcards.binset_name}/ {threads}
         """
