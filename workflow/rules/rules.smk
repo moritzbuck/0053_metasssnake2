@@ -86,7 +86,7 @@ rule binning:
 rule binsetting:
     input : unpack(lambda wildcards :  [ "{root}/binnings/{binning}/binned_assembly.fna".format(root = wildcards.root, binning = binning) for binning in config['binsets'][wildcards.binset_name]['binnings'] ])
     output :
-        assembly_by_binset = "{root}/binsets/{binset_name}/binset.fna"
+        assembly_by_binset = "{root}/binsets/{binset_name}/{binset_name}.fna"
     log :
         log = "{root}/binset/{binset_name}/logs/binset.log",
         env = "{root}/binnings/{binset_name}/logs/binset.yaml",

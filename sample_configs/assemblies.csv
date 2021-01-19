@@ -1,0 +1,17 @@
+,libraries,assembler,preprocess,length_cutoff,keep_unpaired,other_parameters
+# assembly name  (no underscores),coassembled libraries ---  name must match names from  the library file,assembly method (optional),read preprocessing method (optional),contig length cutoff (optional),True if unpaired reads should be used,other paramters in form PARAMETER_NAME=VALUE separated by “;” --- think last column of a gff-file (optional)
+BCN4,DNA_BCN4-A;DNA_BCN4-B;DNA_BCN4-C,megahit,none,1500,False,
+BCN4-A,DNA_BCN4-A,megahit,none,1500,False,
+BCN4-B,DNA_BCN4-B,megahit,none,1500,False,
+BCN4-C,DNA_BCN4-C,megahit,none,1500,False,
+CS14,DNA_CS14-1;DNA_CS14-2;DNA_CS14-3,megahit,none,1500,False,
+CS14-1,DNA_CS14-1,megahit,none,1500,False,
+CS14-2,DNA_CS14-1,megahit,none,1500,False,
+CS14-3,DNA_CS14-3,megahit,none,1500,False,
+full_coassembly,DNA_BCN4-A;DNA_BCN4-B;DNA_BCN4-C;DNA_CS14-1;DNA_CS14-2;DNA_CS14-3;DNA_CS3-1;DNA_CS3-2;DNA_CS3-3;DNA_CS4-1;DNA_CS4-2;DNA_CS4-3;DNA_CS7-1;DNA_CS7-2;DNA_CS7-3;DNA_EN15-1;DNA_EN15-2;DNA_EN15-3;DNA_EN17-1;DNA_EN17-2;DNA_EN17-3;DNA_ENASUA-1;DNA_ENASUA-2;DNA_ENASUA-3;DNA_ENAXPE-1;DNA_ENAXPE-2;DNA_ENAXPE-3;DNA_KPH0to2cm-1;DNA_KPH0to2cm-2;DNA_KPH0to2cm-3,megahit,bbnorm,1500,False,
+KPH0to2cm,DNA_KPH0to2cm-1;DNA_KPH0to2cm-2;DNA_KPH0to2cm-3,megahit,none,1500,False,
+KPH0to2cm-1,DNA_KPH0to2cm-1,megahit,none,1500,False,
+KPH0to2cm-2,DNA_KPH0to2cm-1,megahit,none,1500,False,
+KPH0to2cm-3,DNA_KPH0to2cm-3,megahit,none,1500,False,
+test-ass,test,megahit,none,300,True,
+test-coass,test_DNA1;test_DNA2;test_DNA3,megahit,none,300,False,

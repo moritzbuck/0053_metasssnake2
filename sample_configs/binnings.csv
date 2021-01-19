@@ -1,0 +1,8 @@
+ ,assemblies,libraries,binner,min_bin_size,other_parameters
+# binning name (no underscores),assemblies merged for the binning --- separated by “;”,libraries mapped for the binning --- separated by “;”,binning method used (optional),minimum size of bins (optional),other paramters in form PARAMETER_NAME=VALUE separated by “;” --- think last column of a gff-file (optional)
+KPH0to2cm-1-straightmetabat,KPH0to2cm-1,DNA_KPH0to2cm-1;DNA_KPH0to2cm-2;DNA_KPH0to2cm-3,metabat,,
+KPH0to2cm-straightmetabat,KPH0to2cm,DNA_KPH0to2cm-1;DNA_KPH0to2cm-2;DNA_KPH0to2cm-3,metabat,,
+KPH0to2cm-straightvamb,KPH0to2cm,DNA_KPH0to2cm-1;DNA_KPH0to2cm-2;DNA_KPH0to2cm-3,vamb,,
+KPH0to2cm-combovamb,KPH0to2cm;KPH0to2cm-1;KPH0to2cm-2;KPH0to2cm-3,DNA_KPH0to2cm-1;DNA_KPH0to2cm-2;DNA_KPH0to2cm-3,vamb,,
+test-coass-metabat,test-coass,test_DNA1;test_DNA2;test_DNA3,metabat,10,
+test-coass-vamb,test-coass,test_DNA1;test_DNA2;test_DNA3,vamb,10,cuda=True

@@ -1,0 +1,16 @@
+,libraries,bin_mapping,assembler,preprocess,length_cutoff
+full_coassembly,"['DNA_BCN4-A', 'DNA_BCN4-B', 'DNA_BCN4-C', 'DNA_CS14-1', 'DNA_CS14-2', 'DNA_CS14-3', 'DNA_CS3-1', 'DNA_CS3-2', 'DNA_CS3-3', 'DNA_CS4-1', 'DNA_CS4-2', 'DNA_CS4-3', 'DNA_CS7-1', 'DNA_CS7-2', 'DNA_CS7-3', 'DNA_EN15-1', 'DNA_EN15-2', 'DNA_EN15-3', 'DNA_EN17-1', 'DNA_EN17-2', 'DNA_EN17-3', 'DNA_ENASUA-1', 'DNA_ENASUA-2', 'DNA_ENASUA-3', 'DNA_ENAXPE-1', 'DNA_ENAXPE-2', 'DNA_ENAXPE-3', 'DNA_KPH0to2cm-1', 'DNA_KPH0to2cm-2', 'DNA_KPH0to2cm-3']","['DNA_BCN4-A', 'DNA_BCN4-B', 'DNA_BCN4-C', 'DNA_CS14-1', 'DNA_CS14-2', 'DNA_CS14-3', 'DNA_CS3-1', 'DNA_CS3-2', 'DNA_CS3-3', 'DNA_CS4-1', 'DNA_CS4-2', 'DNA_CS4-3', 'DNA_CS7-1', 'DNA_CS7-2', 'DNA_CS7-3', 'DNA_EN15-1', 'DNA_EN15-2', 'DNA_EN15-3', 'DNA_EN17-1', 'DNA_EN17-2', 'DNA_EN17-3', 'DNA_ENASUA-1', 'DNA_ENASUA-2', 'DNA_ENASUA-3', 'DNA_ENAXPE-1', 'DNA_ENAXPE-2', 'DNA_ENAXPE-3', 'DNA_KPH0to2cm-1', 'DNA_KPH0to2cm-2', 'DNA_KPH0to2cm-3']",megahit,bbnorm,1500
+CS14,"['DNA_CS14-1', 'DNA_CS14-2', 'DNA_CS14-3']","['DNA_CS14-1', 'DNA_CS14-2', 'DNA_CS14-3']",megahit,none,1500
+CS14-1,['DNA_CS14-1'],"['DNA_CS14-1', 'DNA_CS14-2', 'DNA_CS14-3']",megahit,none,1500
+CS14-2,['DNA_CS14-1'],"['DNA_CS14-1', 'DNA_CS14-2', 'DNA_CS14-3']",megahit,none,1500
+CS14-3,['DNA_CS14-3'],"['DNA_CS14-1', 'DNA_CS14-2', 'DNA_CS14-3']",megahit,none,1500
+KPH0to2cm,"['DNA_KPH0to2cm-1', 'DNA_KPH0to2cm-2', 'DNA_KPH0to2cm-3']","['DNA_KPH0to2cm-1', 'DNA_KPH0to2cm-2', 'DNA_KPH0to2cm-3']",megahit,none,1500
+KPH0to2cm-1,['DNA_KPH0to2cm-1'],"['DNA_KPH0to2cm-1', 'DNA_KPH0to2cm-2', 'DNA_KPH0to2cm-3']",megahit,none,1500
+KPH0to2cm-2,['DNA_KPH0to2cm-1'],"['DNA_KPH0to2cm-1', 'DNA_KPH0to2cm-2', 'DNA_KPH0to2cm-3']",megahit,none,1500
+KPH0to2cm-3,['DNA_KPH0to2cm-3'],"['DNA_KPH0to2cm-1', 'DNA_KPH0to2cm-2', 'DNA_KPH0to2cm-3']",megahit,none,1500
+BCN4-B,['DNA_BCN4-B'],"['DNA_BCN4-A', 'DNA_BCN4-B', 'DNA_BCN4-C']",megahit,none,1500
+BCN4,"['DNA_BCN4-A', 'DNA_BCN4-B', 'DNA_BCN4-C']","['DNA_BCN4-A', 'DNA_BCN4-B', 'DNA_BCN4-C']",megahit,none,1500
+BCN4-A,['DNA_BCN4-A'],"['DNA_BCN4-A', 'DNA_BCN4-B', 'DNA_BCN4-C']",megahit,none,1500
+BCN4-C,['DNA_BCN4-C'],"['DNA_BCN4-A', 'DNA_BCN4-B', 'DNA_BCN4-C']",megahit,none,1500
+test_ass,['test_DNA1'],"['test_DNA1', 'test_DNA2', 'test_DNA3']",megahit,none,300
+test_coass,"['test_DNA1', 'test_DNA2', 'test_DNA3']","['test_DNA1', 'test_DNA2', 'test_DNA3']",megahit,none,300
