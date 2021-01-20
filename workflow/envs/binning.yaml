@@ -10,7 +10,7 @@ dependencies:
   - samtools
   - biopython
   - tqdm
-  - pytorch=1.7.1-cp36
+  - pytorch=1.7.1
   - torchvision=0.8.2
   - cudatoolkit
   - vamb
