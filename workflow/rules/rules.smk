@@ -1,7 +1,7 @@
 from os.path import join as pjoin
 
 rule library_processing:
-    input : unpack(lambda wildcards :  [pjoin(config['raw_folder'],v) for v in config['libraries'][wildcards.lib_name]['fwd'] + config['libraries'][wildcards.lib_name]['rev'] + config['libraries'][wildcards.lib_name]['unp'] ])
+    input : unpack(lambda wildcards :  [pjoin(config['raw_folder'],v) for v in config['libraries'][wildcards.lib_name]['fwd'] + config['libraries'][wildcards.lib_name]['rev'] + config['libraries'][wildcards.lib_name]['unp'] if v != ""])
     output :
         fwd = "{root}/libraries/{lib_name}/{lib_name}_fwd.fastq.gz",
         rev = "{root}/libraries/{lib_name}/{lib_name}_rev.fastq.gz",
