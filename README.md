@@ -55,3 +55,28 @@ snakemake --use-conda --configfile YOUR_CONFIG_FILE --cores THREADS ROOT_PATH/as
 snakemake --use-conda --configfile YOUR_CONFIG_FILE --cores THREADS ROOT_PATH/binsets/MYBINSET/MYBINSET.fna
 
 ```
+
+
+## supplemented scripts
+
+A few additional scripts are available for various purposes, they might need some python libs, do check your error messages, Also they probably only runs if you are in the folder where the workflow is.:
+
+### config validation
+
+run :
+
+```
+python $metasssnake2_path/workflow/scripts/utils.py validate_descriptor YOUR_CONFIG_FILE
+```
+
+to check your config-file
+
+### generate csvs from path
+
+if your libraries are in the right folder structure, somehow, generates a bunch of csvs as a pair of reads per library and single sample assemblies and binning, and one big binset with all. As well as a config-file.
+
+```
+python $metasssnake2_path/workflow/scripts/utils.py csv_generator ABSOLUTE_PATH_TO_THE_FOLDER ABSOLUTE_OUT_FILE_PREFIX
+```
+
+some editing of the outputted JSON is necessary though

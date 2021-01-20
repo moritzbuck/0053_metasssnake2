@@ -23,6 +23,12 @@ def csv2dict(file):
         data = {k : {kk : trystr2int(vv) for kk,vv in zip(header,v)} for k,v in data.items()}
     return data
 
+def dict2file(dd, file):
+    cols = list(list(dd.values())[0].keys())
+    with open(file, "w") as handle:
+        handle.writelines([",".join([""] + cols) + "\n"] )
+        handle.writelines([ k + "," + ",".join([v[kk] for kk in cols]) + "\n"  for k,v in dd.items()])
+
 def is_type(s, typ):
     try:
         typ(s)
@@ -63,8 +69,8 @@ def generate_config(file_or_dict):
     else :
         config_dat = file_or_dict
     try :
-#        if necessary_paths['temp_folder'].startswith("$"):
-#            necessary_paths['temp_folder'] = os.environ[necessary_paths['temp_folder'][1:]]
+        if config_dat['temp_folder'].startswith("$"):
+            config_dat['temp_folder'] = os.environ[config_dat['temp_folder'][1:]]
         for k in general_fields:
             config_dat[k] = validate_field(config_dat.get(k), general_fields[k], k)
         for param in necessary_paths:
@@ -161,6 +167,55 @@ def freetxt_line(text, logfile, llen = 90, also_stderr = True) :
     if also_stderr:
         print(text, file = stderr, flush = True)
 
+def folder2csvs(folder, oprefix):
+    fastqs = []
+    for v in os.walk(folder):
+        for vv in v[2]:
+            if vv.endswith(".fastq.gz"):
+                fastqs += [pjoin(folder,v[0], vv)]
+    libraries = {os.path.basename(os.path.dirname(f)) for f in fastqs}
+    libraries_dat = dict()
+    assemblies_dat = dict()
+    binnings_dat = dict()
+    for lname in libraries:
+        fwds = [l for l in fastqs if (lname + "/") in l  and "_R1_" in l]
+        revs = [l for l in fastqs if (lname + "/") in l  and "_R1_" in l]
+        libraries_dat[lname] = { 'fwd' : ";".join(fwds), 'rev' : ";".join(revs) }
+        assemblies_dat[lname.replace("Sample_", "")] = { 'libraries' : lname }
+        binnings_dat[lname.replace("Sample_", "binning-")] = { 'assemblies' : lname.replace("Sample_", "") , 'libraries' : lname}
+
+    binsets_dat = { "all-single-samples" : { 'binnings' : ";".join(list(binnings_dat.keys()))}}
+
+
+    oass = oprefix + "_assemblies.csv"
+    olib = oprefix + "_libraries.csv"
+    obin = oprefix + "_binnings.csv"
+    oset = oprefix + "_binsets.csv"
+    ojson = oprefix + "_config.json"
+
+    cfg = """
+    {{
+        "root_folder"       : "INSERT_DATA_OUTFOLDER",
+        "temp_folder"       : "INSERT_TMP_FOLDER_CAN_BE_ENVVARIABLE_IF_START_WITH_DOLLAR",
+        "raw_folder"        : "/",
+        "config_file"       : "{ojson}",
+        "libraries_file"    : "{olib}",
+        "assemblies_file"   : "{oass}",
+        "binnings_file"     : "{obin}",
+        "binsets_file"      : "{oset}"
+    }}
+    """.format(ojson = ojson, olib = olib, oass = oass, obin = obin, oset = oset)
+
+    with open(ojson, "w") as handle:
+        handle.writelines(cfg)
+
+    dict2file(assemblies_dat, oass)
+    dict2file(libraries_dat, olib)
+    dict2file(binnings_dat, obin)
+    dict2file(binsets_dat, oset)
+
+
+    return [oass, olib,obin, oset, ojson]
 
 
 def main():
@@ -171,6 +226,10 @@ def main():
         test = generate_config(cline[2])
         if test:
             print("File " + cline[2] + " is valid")
-            json.dump(test[cline[3]], stdout, sort_keys = True, indent = 2)
+            #json.dump(test[cline[3]], stdout, sort_keys = True, indent = 2)
+    if cline[1] == "csv_generator":
+        test = folder2csvs(cline[2], cline[3])
+        if test:
+            print("Files " + ", ".join(test) + " generated")
 if __name__ == "__main__":
     main()
