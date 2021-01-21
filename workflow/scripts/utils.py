@@ -1,5 +1,3 @@
-from workflow.scripts.hard_config import *
-from workflow._version import __version__
 from datetime import datetime
 from math import floor, ceil
 from sys import stderr, stdout
@@ -37,7 +35,9 @@ def is_type(s, typ):
         return False
 
 def validate_field(value, validator, name):
+    from workflow.scripts.hard_config import *
 
+    
     if not validator:
         return value
     if not value or value == '':
@@ -59,6 +59,9 @@ def validate_field(value, validator, name):
 
 
 def generate_config(file_or_dict):
+    from workflow.scripts.hard_config import *
+    from workflow._version import __version__
+
     if type(file_or_dict) != dict:
         try :
             with open(file_or_dict) as handle:
@@ -179,7 +182,7 @@ def folder2csvs(folder, oprefix):
     binnings_dat = dict()
     for lname in libraries:
         fwds = [l for l in fastqs if (lname + "/") in l  and "_R1_" in l]
-        revs = [l for l in fastqs if (lname + "/") in l  and "_R2_" in l]
+        revs = [l for l in fastqs if (lname + "/") in l  and "_R1_" in l]
         libraries_dat[lname] = { 'fwd' : ";".join(fwds), 'rev' : ";".join(revs) }
         assemblies_dat[lname.replace("Sample_", "")] = { 'libraries' : lname }
         binnings_dat[lname.replace("Sample_", "binning-")] = { 'assemblies' : lname.replace("Sample_", "") , 'libraries' : lname}
