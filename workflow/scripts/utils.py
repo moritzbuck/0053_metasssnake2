@@ -179,7 +179,7 @@ def folder2csvs(folder, oprefix):
     binnings_dat = dict()
     for lname in libraries:
         fwds = [l for l in fastqs if (lname + "/") in l  and "_R1_" in l]
-        revs = [l for l in fastqs if (lname + "/") in l  and "_R1_" in l]
+        revs = [l for l in fastqs if (lname + "/") in l  and "_R2_" in l]
         libraries_dat[lname] = { 'fwd' : ";".join(fwds), 'rev' : ";".join(revs) }
         assemblies_dat[lname.replace("Sample_", "")] = { 'libraries' : lname }
         binnings_dat[lname.replace("Sample_", "binning-")] = { 'assemblies' : lname.replace("Sample_", "") , 'libraries' : lname}
