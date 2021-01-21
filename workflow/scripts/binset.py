@@ -1,7 +1,7 @@
 import sys, os
 from tqdm import tqdm
 from os.path import join as pjoin
-from workflow.scripts.utils import generate_config, title2log, freetxt_line
+from workflow.scripts.utils import generate_config, title2log, freetxt_line, dict2file
 import shutil
 from subprocess import call
 from os.path import basename
@@ -53,11 +53,12 @@ for f in os.listdir(tbinfoder):
 
 title2log("Running checkm", logfile)
 
-#call("checkm lineage_wf -x fna -t 24 {temp}/bins/ {temp}/checkm > {temp}/checkm.txt  2>> {logfile}".format(temp = temp_folder, logfile = logfile), shell = True)
+call("checkm lineage_wf -x fna -t 24 {temp}/bins/ {temp}/checkm > {temp}/checkm.txt  2>> {logfile}".format(temp = temp_folder, logfile = logfile), shell = True)
 
 with open(pjoin(temp_folder, "checkm.txt")) as handle:
     all_lines = [l.strip() for l in  handle.readlines() if " INFO:" not in l]
 
+title2log("Parsing and filtering based on checkm", logfile)
 
 all_lines = [re.sub(r"  +","\t", a).split("\t") for a in all_lines]
 header_lines = [i for i,l in enumerate(all_lines) if 'Bin Id' in l and 'Completeness' in l and 'Contamination' in l]
@@ -66,7 +67,7 @@ header_line = all_lines[header_lines]
 lines = [l for i,l in enumerate(all_lines) if i != header_lines and len(l) == len(header_line)]
 lines = [{a : b if a in ['Marker lineage', 'Bin Id'] else float(b) for a,b in zip(header_line,l) }for l in lines]
 
-checkm_out = {l['Bin Id'] : {k: l[k] for k in ('Completeness', 'Contamination')} for l in lines if l['Completeness'] > min_completeness and l['Contamination'] < max_contamination}
+checkm_out = {l['Bin Id'] : {k: l[k] for k in ('Completeness', 'Contamination', 'Strain heterogeneity')} for l in lines if l['Completeness'] > min_completeness and l['Contamination'] < max_contamination}
 
 for f in os.listdir(tbinfoder):
     if f[:-4] not in checkm_out:
@@ -74,24 +75,41 @@ for f in os.listdir(tbinfoder):
             append2unkept(f)
         os.remove(pjoin(tbinfoder, f))
 
+title2log("Parsing and filtering based faa/fnas", logfile)
+
+for f in os.listdir(tbinfoder):
+    fna = list(SeqIO.parse(pjoin(tbinfoder, f), "fasta"))
+    faa = list(SeqIO.parse(pjoin(temp_folder, "checkm/bins/", f[:-4], "genes.faa"), "fasta"))
+    checkm_out[f[:-4]]['length'] = sum([len(s) for s in fna])
+    checkm_out[f[:-4]]['acoding_density'] = 3*sum([len(s) for s in faa])/checkm_out[f[:-4]]['length']
+
+for f in os.listdir(tbinfoder):
+    if checkm_out[f[:-4]]['acoding_density'] < min_coding:
+        if keep_fails:
+            append2unkept(f)
+        os.remove(pjoin(tbinfoder, f))
+        del checkm_out[f[:-4]]
+
+dict2file(checkm_out, pjoin(out_folder, binset_name + ".csv"))
+
+call("prokka --outdir bins --prefix --locustag --metagenome --cpus {threads}")
+system
 
 
-syst.exit(0)
+for file in os.listdir(tbinfoder):
+    shutil.move(pjoin(tbinfoder,file), pjoin(cbinfoder))
 
-bins = [b for b in os.listdir(tbinfoder) if b.endswith(".fa")]
-zeros = len(str(len(bins)))
-for b in tqdm(bins):
-    clean_bin(pjoin(tbinfoder, b), pjoin(cbinfoder, binset_name + "_bin-" + b.split(".")[-2].zfill(zeros) + ".fna"), binset_name + "_bin-" + b.split(".")[-2].zfill(zeros))
 
 title2log("Cleaning up and moving the bins", logfile)
 
-if os.path.exists(pjoin(out_folder, "binned_assembly.fna")):
-    os.remove(pjoin(out_folder, "binned_assembly.fna"))
+if os.path.exists(pjoin(out_folder, binset_name + ".fna")):
+    os.remove(pjoin(out_folder,  binset_name +  ".fna"))
+
 
 os.makedirs(pjoin(out_folder, "bins") , exist_ok = True)
 for file in os.listdir(cbinfoder):
     shutil.move(pjoin(cbinfoder,file), pjoin(out_folder, "bins"))
-    call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file), ass = pjoin(out_folder, "binned_assembly.fna")), shell=True)
+    call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file), ass = pjoin(out_folder,  binset_name + ".fna")), shell=True)
 
 title2log("Binsetting done", logfile)
 
