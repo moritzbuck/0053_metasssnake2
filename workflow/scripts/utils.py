@@ -5,7 +5,11 @@ import subprocess
 import json
 import os
 import sys
+
+sys.path.append(os.getcwd())
 from os.path import join as pjoin
+from workflow.scripts.hard_config import *
+from workflow._version import __version__
 
 def trystr2int(i):
     try:
@@ -35,7 +39,6 @@ def is_type(s, typ):
         return False
 
 def validate_field(value, validator, name):
-    from workflow.scripts.hard_config import *
 
 
     if not validator:
@@ -59,8 +62,7 @@ def validate_field(value, validator, name):
 
 
 def generate_config(file_or_dict):
-    from workflow.scripts.hard_config import *
-    from workflow._version import __version__
+
 
     if type(file_or_dict) != dict:
         try :
