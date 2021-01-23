@@ -1,4 +1,6 @@
 import sys, os
+sys.path.append(os.getcwd())
+
 from tqdm import tqdm
 from os.path import join as pjoin
 from workflow.scripts.utils import generate_config, title2log, freetxt_line
