@@ -120,4 +120,34 @@ binsets_fields =  {
         'type' : str,
         'default' : {}
     },
+    'min_completeness' : {
+        'type' : float,
+        'default' : 30,
+        'min' : 0,
+        'max' : 100
+    },
+    'max_contamination' : {
+        'type' : float,
+        'default' : 5,
+        'min' : 0,
+    },
+    'min_coding' : {
+        'type' : float,
+        'default' : 0.2,
+        'min' : 0,
+        'max' : 1
+    },
+    'min_size' : {
+        'type' : float,
+        'default' : 200000,
+        'min' : 0
+    },
+    'keep_fails' : {
+        'type' : bool,
+        'default' : True
+    },
+    'other_parameters' : {
+        'type' : str,
+        'default' : {}
+    },
 }

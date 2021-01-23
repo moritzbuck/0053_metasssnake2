@@ -6,3 +6,5 @@ channels:
 dependencies:
   - checkm-genome
   - tqdm
+  - biopython
+  - prokka

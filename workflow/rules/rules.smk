@@ -86,14 +86,15 @@ rule binning:
 rule binsetting:
     input : unpack(lambda wildcards :  [ "{root}/binnings/{binning}/binned_assembly.fna".format(root = wildcards.root, binning = binning) for binning in config['binsets'][wildcards.binset_name]['binnings'] ])
     output :
-        assembly_by_binset = "{root}/binsets/{binset_name}/{binset_name}.fna"
+        assembly_by_binset = "{root}/binsets/{binset_name}/{binset_name}.fna",
+        binset_stats = "{root}/binsets/{binset_name}/{binset_name}.csv"
     log :
-        log = "{root}/binset/{binset_name}/logs/binset.log",
-        env = "{root}/binnings/{binset_name}/logs/binset.yaml",
-        settings = "{root}/binnings/{binset_name}/logs/binset_settings.json"
+        log = "{root}/binsets/{binset_name}/logs/binset.log",
+        env = "{root}/binsets/{binset_name}/logs/binset.yaml",
+        settings = "{root}/binsets/{binset_name}/logs/binset_settings.json"
     threads : 24
     params : script = "workflow/scripts/binset.py", config_file = config['config_file']
     conda : "../envs/binset.yaml"
     shell : """
-        python {params.script} {wildcards.binset_name} {params.config_file} {wildcards.root} {wildcards.root}/binnings/{wildcards.binset_name}/ {threads}
+        python {params.script} {wildcards.binset_name} {params.config_file} {wildcards.root} {wildcards.root}/binsets/{wildcards.binset_name}/ {threads}
         """
