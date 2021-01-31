@@ -6,6 +6,8 @@ import json
 import os
 import sys
 from os.path import join as pjoin
+from workflow.scripts.hard_config import *
+from workflow._version import __version__
 
 def trystr2int(i):
     try:
@@ -35,9 +37,6 @@ def is_type(s, typ):
         return False
 
 def validate_field(value, validator, name):
-    from workflow.scripts.hard_config import *
-
-
     if not validator:
         return value
     if not value or value == '':
@@ -59,8 +58,6 @@ def validate_field(value, validator, name):
 
 
 def generate_config(file_or_dict):
-    from workflow.scripts.hard_config import *
-    from workflow._version import __version__
 
     if type(file_or_dict) != dict:
         try :
@@ -220,7 +217,7 @@ def folder2csvs(folder, oprefix):
 
     return [oass, olib,obin, oset, ojson]
 
-def folder2csvs(folder, oprefix):
+def folder2csvs2(folder, oprefix):
     fastqs = []
     for v in os.walk(folder):
         for vv in v[2]:
@@ -231,8 +228,8 @@ def folder2csvs(folder, oprefix):
     assemblies_dat = dict()
     binnings_dat = dict()
     for lname in libraries:
-        fwds = [l for l in fastqs if "_" + lname + "_" in os.basename(l)  and "_R1_" in l]
-        revs = [l for l in fastqs if "_" + lname + "_" in os.basename(l)  and "_R2_" in l]
+        fwds = [l for l in fastqs if "_" + lname + "_" in os.path.basename(l)  and "_R1_" in l]
+        revs = [l for l in fastqs if "_" + lname + "_" in os.path.basename(l)  and "_R2_" in l]
         libraries_dat[lname] = { 'fwd' : ";".join(fwds), 'rev' : ";".join(revs) }
         assemblies_dat[lname.replace("Sample_", "")] = { 'libraries' : lname }
         binnings_dat[lname.replace("Sample_", "binning-")] = { 'assemblies' : lname.replace("Sample_", "") , 'libraries' : lname}
@@ -275,8 +272,8 @@ def folder2csvs(folder, oprefix):
 def main():
     import sys
 
-    cline = sys.argv
     if cline[1] == "validate_descriptor":
+    cline = sys.argv
         test = generate_config(cline[2])
         if test:
             print("File " + cline[2] + " is valid")
