@@ -1,4 +1,5 @@
 import sys, os
+sys.path.append(os.getcwd())
 from tqdm import tqdm
 from os.path import join as pjoin
 from workflow.scripts.utils import generate_config, title2log, freetxt_line
@@ -81,7 +82,7 @@ for lib in config_file['binnings'][binning_name]['libraries']:
     rm {temp}/{lname}_pairs.bam {temp}/{lname}_unpaired.bam 2>> {out_folder}/logs/binning.log
     """.format(root_folder = root_folder, lname = lib, temp=temp_folder, threads = threads, out_folder = out_folder), shell=True)
 
-call("""
+    call("""
 rm {temp}/fwd.fastq
 rm {temp}/rev.fastq
 rm {temp}/unp.fastq

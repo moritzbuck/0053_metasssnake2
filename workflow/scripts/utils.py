@@ -5,6 +5,8 @@ import subprocess
 import json
 import os
 import sys
+
+sys.path.append(os.getcwd())
 from os.path import join as pjoin
 from workflow.scripts.hard_config import *
 from workflow._version import __version__
@@ -37,6 +39,11 @@ def is_type(s, typ):
         return False
 
 def validate_field(value, validator, name):
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 5c9f26c606e6dc713cde6a5731e7652c499c9d9e
     if not validator:
         return value
     if not value or value == '':
@@ -58,7 +65,6 @@ def validate_field(value, validator, name):
 
 
 def generate_config(file_or_dict):
-
     if type(file_or_dict) != dict:
         try :
             with open(file_or_dict) as handle:
