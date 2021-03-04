@@ -146,8 +146,9 @@ binsets_fields =  {
         'type' : bool,
         'default' : True
     },
-    'other_parameters' : {
+    'additional_annotation' : {
         'type' : str,
-        'default' : {}
+        'default' : "",
+        'possibles' : ['gtdbtk+sourmash', 'eggnogmapper', 'anvioscg', 'motulize' ]
     },
 }

@@ -39,17 +39,12 @@ def is_type(s, typ):
         return False
 
 def validate_field(value, validator, name):
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 5c9f26c606e6dc713cde6a5731e7652c499c9d9e
     if not validator:
         return value
     if not value or value == '':
         return validator['default']
     if 'possibles' in validator:
-        assert value in validator['possibles'], 'The value of the field "' + name + '" is '+ str(value) + ' should be in {}'.format(validator['possibles'])
+        assert value in validator['possibles'] or all([vv in validator['possibles'] for vv in value.split(";")]), 'The value(s) of the field "' + name + '" is(are) '+ str(value) + ', and should be in {}'.format(validator['possibles'])
     if 'type' in validator:
         assert is_type(value,validator['type']), 'The value of the field "' + name + '" should be convertible to {}'.format(validator['type'].__name__)
         value = validator['type'](value)
@@ -131,10 +126,8 @@ def generate_config(file_or_dict):
                 assert field in v, field + " needs to be in the binsets file"
             v.update({kk : validate_field(binsets_dat[k].get(kk), binsets_fields[kk], kk) for kk in binsets_fields})
             v['binnings'] = v['binnings'].split(";")
-
-
             for bini in v['binnings']:
-                assert bini in config_dat['binnings'], "no such binning as " + ass + " for your binset " + k
+                assert bini in config_dat['binnings'],  "no such binning as " + bini + " for your binset " + k
 
             binsets_dat[k] = v
         config_dat['binsets'] = binsets_dat
@@ -279,7 +272,7 @@ def main():
     import sys
 
     if cline[1] == "validate_descriptor":
-    cline = sys.argv
+        cline = sys.argv
         test = generate_config(cline[2])
         if test:
             print("File " + cline[2] + " is valid")

@@ -90,26 +90,42 @@ for f in os.listdir(tbinfoder):
         os.remove(pjoin(tbinfoder, f))
         del checkm_out[f[:-4]]
 
+
+title2log("Running prokka for the bins", logfile)
+
+
+call("sed -i 's/my $MAXCONTIGIDLEN = 37/my $MAXCONTIGIDLEN = 250/' `which prokka` ", shell=True)
+call("sed -i 's/[^#]tbl2asn -V/#tbl2asn -V/' `which prokka` ", shell=True)
+
+
+call("prokka --outdir {temp}/clean_bins/{binset}_unkept --prefix {binset}_unkept --locustag {binset}_unkept --metagenome --cpus {threads} {temp}/clean_bins/{binset}_unkept.fna".format(threads= threads, binset = binset_name, temp=temp_folder), shell=True)
+os.remove(pjoin(cbinfoder, binset_name + "_unkept.fna"))
+
+call("ls {temp}/bins/ | cut -f1 -d. | parallel -j{threads} prokka --outdir {temp}/clean_bins/{{}} --prefix {{}} --locustag {{}} --cpus 1 {temp}/bins/{{}}.fna".format(threads= threads, temp=temp_folder), shell = True)
+
+for g in checkm_out:
+    fna = [s.seq for s in SeqIO.parse(pjoin(cbinfoder, g, g +".fna"), "fasta")]
+    faa = [s.seq for s in SeqIO.parse(pjoin(cbinfoder, g, g +".faa"), "fasta")]
+    checkm_out[g]['nb_contigs'] = len(fna)
+    checkm_out[g]['bin_len'] = sum([len(s) for s in fna])
+    checkm_out[g]['nb_cdss'] = len(faa)
+    checkm_out[g]['acoding_density'] = sum([len(s)*3 for s in faa])/checkm_out[g]['bin_len']
+
+
 dict2file(checkm_out, pjoin(out_folder, binset_name + ".csv"))
-
-call("prokka --outdir bins --prefix --locustag --metagenome --cpus {threads}")
-system
-
-
-for file in os.listdir(tbinfoder):
-    shutil.move(pjoin(tbinfoder,file), pjoin(cbinfoder))
-
 
 title2log("Cleaning up and moving the bins", logfile)
 
 if os.path.exists(pjoin(out_folder, binset_name + ".fna")):
     os.remove(pjoin(out_folder,  binset_name +  ".fna"))
 
-
 os.makedirs(pjoin(out_folder, "bins") , exist_ok = True)
 for file in os.listdir(cbinfoder):
     shutil.move(pjoin(cbinfoder,file), pjoin(out_folder, "bins"))
-    call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file), ass = pjoin(out_folder,  binset_name + ".fna")), shell=True)
+    if file != binset_name + "_unkept":
+        call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".fna"), ass = pjoin(out_folder,  binset_name + ".fna")), shell=True)
+        call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".faa"), ass = pjoin(out_folder,  binset_name + ".faa")), shell=True)
+        call("cat {file} | grep -v '^##' >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".gff"), ass = pjoin(out_folder,  binset_name + ".gff")), shell=True)
 
 title2log("Binsetting done", logfile)
 
