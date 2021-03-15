@@ -95,13 +95,28 @@ title2log("Running prokka for the bins", logfile)
 
 
 call("sed -i 's/my $MAXCONTIGIDLEN = 37/my $MAXCONTIGIDLEN = 250/' `which prokka` ", shell=True)
-call("sed -i 's/[^#]tbl2asn -V/#tbl2asn -V/' `which prokka` ", shell=True)
+#call("sed -i 's/[^#]tbl2asn -V/#tbl2asn -V/' `which prokka` ", shell=True)
 
+if keep_fails:
+    nb_contigs = len([ None for s in tqdm(SeqIO.parse(pjoin(temp_folder, "clean_bins", binset_name + "_unkept.fna"), "fasta"))])
+    zeros = len(str(nb_contigs))
+    max_buffer_size = config_file['seqio_buffer_size']
+    buffer = []
+    with open(pjoin(temp_folder, "clean_bins", binset_name + "_unkept2.fna"), "w") as handle:
+        for i,s in tqdm(enumerate(SeqIO.parse(pjoin(temp_folder, "clean_bins", binset_name + "_unkept.fna"), "fasta"))):
+            s.id = binset_name + "-kept_" + str(i+1).zfill(zeros) + ";" + s.id
+            s.description = ""
+            buffer += [s]
+            if len(buffer) > max_buffer_size:
+                SeqIO.write(buffer, handle, "fasta")
+                buffer = []
+        SeqIO.write(buffer, handle, "fasta")
 
-call("prokka --outdir {temp}/clean_bins/{binset}_unkept --prefix {binset}_unkept --locustag {binset}_unkept --metagenome --cpus {threads} {temp}/clean_bins/{binset}_unkept.fna".format(threads= threads, binset = binset_name, temp=temp_folder), shell=True)
+shutil.move(pjoin(temp_folder, "clean_bins", binset_name + "_unkept2.fna"),pjoin(temp_folder, "clean_bins", binset_name + "_unkept.fna"))
+call("prokka --outdir {temp}/clean_bins/{binset}_unkept --prefix {binset}_unkept --locustag {binset}_unkept --metagenome --cpus {threads} {temp}/clean_bins/{binset}_unkept.fna >> {logfile}  2>&1".format(threads= threads, binset = binset_name, temp=temp_folder, logfile = logfile), shell=True)
 os.remove(pjoin(cbinfoder, binset_name + "_unkept.fna"))
 
-call("ls {temp}/bins/ | cut -f1 -d. | parallel -j{threads} prokka --outdir {temp}/clean_bins/{{}} --prefix {{}} --locustag {{}} --cpus 1 {temp}/bins/{{}}.fna".format(threads= threads, temp=temp_folder), shell = True)
+call("ls {temp}/bins/ | cut -f1 -d. | parallel -j{threads} prokka --outdir {temp}/clean_bins/{{}} --prefix {{}} --locustag {{}} --cpus 1 {temp}/bins/{{}}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder), shell = True)
 
 for g in checkm_out:
     fna = [s.seq for s in SeqIO.parse(pjoin(cbinfoder, g, g +".fna"), "fasta")]
@@ -112,7 +127,7 @@ for g in checkm_out:
     checkm_out[g]['acoding_density'] = sum([len(s)*3 for s in faa])/checkm_out[g]['bin_len']
 
 
-dict2file(checkm_out, pjoin(out_folder, binset_name + ".csv"))
+dict2file(checkm_out, pjoin(out_folder, binset_name + "_basics.csv"))
 
 title2log("Cleaning up and moving the bins", logfile)
 
@@ -122,10 +137,9 @@ if os.path.exists(pjoin(out_folder, binset_name + ".fna")):
 os.makedirs(pjoin(out_folder, "bins") , exist_ok = True)
 for file in os.listdir(cbinfoder):
     shutil.move(pjoin(cbinfoder,file), pjoin(out_folder, "bins"))
-    if file != binset_name + "_unkept":
-        call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".fna"), ass = pjoin(out_folder,  binset_name + ".fna")), shell=True)
-        call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".faa"), ass = pjoin(out_folder,  binset_name + ".faa")), shell=True)
-        call("cat {file} | grep -v '^##' >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".gff"), ass = pjoin(out_folder,  binset_name + ".gff")), shell=True)
+    call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".fna"), ass = pjoin(out_folder,  binset_name + ".fna")), shell=True)
+    call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".faa"), ass = pjoin(out_folder,  binset_name + ".faa")), shell=True)
+    call("sed '/##FASTA/q' {file} | grep -v '^# ' >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".gff"), ass = pjoin(out_folder,  binset_name + ".gff")), shell=True)
 
 title2log("Binsetting done", logfile)
 
