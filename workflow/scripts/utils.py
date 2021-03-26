@@ -65,7 +65,7 @@ def generate_config(file_or_dict):
             with open(file_or_dict) as handle:
                 config_dat = json.load(handle)
         except Exception as err:
-            print("ERROR : {file} not valid\nERROR Your description/config json-file is not a valid json file... Check the doc for formating advice".format(file = file_or_dict, err = err), file = sys.stderr)
+            print("ERROR : {file} not valid\nERROR Your description/config json-file is not a valid json file... Check the doc for formating advice".format(file = file_or_dict, err = err))#, file = sys.stderr)
             return None
     else :
         config_dat = file_or_dict
@@ -133,10 +133,10 @@ def generate_config(file_or_dict):
             binsets_dat[k] = v
         config_dat['binsets'] = binsets_dat
     except AssertionError as err:
-        print("ERROR : config not valid\nERROR {err}\nERROR Check the doc for formating advice".format(err = err), file = sys.stderr)
+        print("ERROR : config not valid\nERROR {err}\nERROR Check the doc for formating advice".format(err = err))#, file = sys.stderr)
         return None
     except Exception as err:
-        print("ERROR : Something unexpected went wrong, so your probably not valid\nERROR {err}\nERROR Check the doc for formating advice".format(err = err), file = sys.stderr)
+        print("ERROR : Something unexpected went wrong, so your probably not valid\nERROR {err}\nERROR Check the doc for formating advice".format(err = err))#, file = sys.stderr)
         return None
 
     config_dat['version'] = __version__
