@@ -69,15 +69,3 @@ with open(pjoin(out_folder, "assembly.fna"), "w") as handle:
 
 
 shutil.rmtree(temp_folder)
-
-
-
-with open(pjoin(out_folder, "filtered_faa.faa"), "w") as handle:
-    for i,s in tqdm(enumerate(SeqIO.parse("all_faas.faa", "fasta"))):
-        if "*" not in s.seq and s > 10:
-            buffer += [s]
-        if len(buffer) > max_buffer_size:
-            print("New Block")
-            SeqIO.write(buffer, handle, "fasta")
-            buffer = []
-    SeqIO.write(buffer, handle, "fasta")

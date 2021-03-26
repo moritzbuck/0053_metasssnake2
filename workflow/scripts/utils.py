@@ -71,6 +71,7 @@ def generate_config(file_or_dict):
         config_dat = file_or_dict
     try :
         if config_dat['temp_folder'].startswith("$"):
+            assert config_dat['temp_folder'][1:] in os.environ, "The env-variable " + config_dat['temp_folder'] + " you picked for temp folder does not exist"
             config_dat['temp_folder'] = os.environ[config_dat['temp_folder'][1:]]
         for k in general_fields:
             config_dat[k] = validate_field(config_dat.get(k), general_fields[k], k)
@@ -270,9 +271,9 @@ def folder2csvs2(folder, oprefix):
 
 def main():
     import sys
+    cline = sys.argv
 
     if cline[1] == "validate_descriptor":
-        cline = sys.argv
         test = generate_config(cline[2])
         if test:
             print("File " + cline[2] + " is valid")

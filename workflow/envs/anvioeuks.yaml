@@ -1,8 +1,8 @@
-name: sortmerna
+name: anvioeuks
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - sortmerna
+  - anvio
   - tqdm
