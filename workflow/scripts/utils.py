@@ -19,7 +19,7 @@ def trystr2int(i):
 
 def csv2dict(file):
     with open(file) as handle:
-        lines = [l[:-1] for l in handle.readlines() if not l.startswith("#")]
+        lines = [l.strip() for l in handle.readlines() if not l.startswith("#")]
         header = lines[0].split(",")[1:]
         data = {l.split(",")[0] : l.split(",")[1:]  for l in lines[1:]}
         data = {k : {kk : trystr2int(vv) for kk,vv in zip(header,v)} for k,v in data.items()}
