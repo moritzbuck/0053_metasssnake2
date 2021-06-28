@@ -8,3 +8,4 @@ dependencies:
   - tqdm
   - biopython
   - prokka
+  - blast=2.2.31
