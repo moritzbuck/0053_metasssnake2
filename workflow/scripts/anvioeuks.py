@@ -25,6 +25,7 @@ def anvio_completeness(fna):
     os.makedirs("temp")
     shutil.copy(fna, "temp/genome.fna")
     call("""
+    anvi-setup-scg-taxonomy -T {threads} 2> /dev/null
     anvi-script-reformat-fasta temp/genome.fna -o temp/contigs4anvio.fa -l 0 --simplify-names 2> /dev/null
     anvi-gen-contigs-database -f temp/contigs4anvio.fa -o temp/contigs.db -T {threads} 2> /dev/null
     anvi-run-hmms -c temp/contigs.db -T {threads} 2> /dev/null

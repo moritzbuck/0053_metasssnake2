@@ -8,3 +8,5 @@ dependencies:
   - khmer
   - sourmash
   - bbmap
+  - tqdm
+  - pigz
