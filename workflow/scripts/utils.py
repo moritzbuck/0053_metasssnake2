@@ -267,6 +267,94 @@ def folder2csvs2(folder, oprefix):
 
     return [oass, olib,obin, oset, ojson]
 
+def gff2anvio(file):
+    import gffutils
+    from collections import Counter
+
+    #inspired by https://github.com/karkman/gff_parser
+
+    #Input file and output files
+    GFF = file
+    OUT_CDS = ""
+    OUT_ANNO = ""
+    SEP = ':'
+
+    #load in the GFF3 file
+    db = gffutils.create_db(GFF, ':memory:')
+
+    #Print headers for anvi'o
+    OUT_CDS += "gene_callers_id\tcontig\tstart\tstop\tdirection\tpartial\tcall_type\tsource\tversion\n"
+    OUT_ANNO += "gene_callers_id\tsource\taccession\tfunction\te_value\n"
+
+    #running gene ID and a trumped-up e-value for the gene calls.
+    gene_id = 1
+    e_value = "0"
+
+    # keping track of things we haven't processed
+    feature_types = Counter()
+    call_types = Counter()
+    total_num_features = 0
+    features_missing_product_or_note = 0
+
+    #parse the GFF3 file and write results to output files
+    for feature in db.all_features():
+        total_num_features += 1
+        # determine source
+        source, version = feature.source.split(SEP, 1)
+
+        start = feature.start - 1
+        stop = feature.stop
+
+        feature_types[feature.featuretype] += 1
+        if feature.featuretype == 'CDS':
+            call_type = 1
+            call_types['CDS'] += 1
+        elif 'RNA' in feature.featuretype:
+            call_type = 2
+            call_types['RNA'] += 1
+        else:
+            call_type = 3
+            call_types['unknown'] += 1
+
+        if (float(start - stop)/float(3)).is_integer() == True:
+            partial = str(0)
+        else:
+            partial = str(1)
+
+        try:
+            gene_acc = feature.attributes['gene'][0]
+        except KeyError:
+            gene_acc = ""
+
+        # if a feature is missing both, move on.
+        if 'product' not in feature.attributes.keys() and 'note' not in feature.attributes.keys():
+            features_missing_product_or_note += 1
+            continue
+
+        try:
+            product = feature.attributes['product'][0]
+        except KeyError:
+            product = feature.attributes['note'][0]
+
+        # skip if hypotethical proiten:
+        if product == 'hypothetical protein':
+            product = ""
+            gene_acc = ""
+
+        # determine direction
+        if feature.featuretype=='repeat_region':
+            direction='f'
+        else:
+            if feature.strand=='+':
+                direction='f'
+            else:
+                direction='r'
+
+        OUT_CDS += '%d\t%s\t%d\t%d\t%s\t%s\t%d\t%s\t%s\n' % (gene_id, feature.seqid, start, stop, direction, partial, call_type, source, version)
+        OUT_ANNO += '%d\t%s:%s\t%s\t%s\t%s\n' % (gene_id, "prokka", source, gene_acc, product, e_value)
+
+        gene_id = gene_id + 1
+    return {'cdss' : OUT_CDS, 'annot' : OUT_ANNO}
 
 
 def main():

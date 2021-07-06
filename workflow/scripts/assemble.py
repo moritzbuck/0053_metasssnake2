@@ -36,14 +36,30 @@ for lib in config_file['assemblies'][ass_name]['libraries']:
     """.format(root_folder = root_folder, lname = lib, temp=temp_folder), shell=True)
 
 if config_file['assemblies'][ass_name]['preprocess'] == 'none':
-    if config_file['assemblies'][ass_name]['keep_unpaired'] :
-        unp = "-r  {temp}/unp.fastq "
-    else :
-        unp = ""
-    megahit_line = "megahit -m 0.9 -1 {temp}/fwd.fastq -2 {temp}/rev.fastq " + unp + "-t {threads} -o {temp}/assembly --min-contig-len {min_len} 2> {log}"
+    pass
+elif config_file['assemblies'][ass_name]['preprocess'] == 'bbnorm':
+    title2log("Running bbnorm diginorm".format(ass_name = ass_name), logfile)
+
+    call("""
+    bbnorm.sh in={temp}/fwd.fastq in2={temp}/rev.fastq out={temp}/tt_fwd.fastq out2={temp}/tt_rev.fastq t={threads} 2>> {log_file}
+    bbnorm.sh in={temp}/unp.fastq out={temp}/tt_unp.fastq t={threads} 2>> {log_file}
+    mv {temp}/tt_fwd.fastq {temp}/fwd.fastq
+    mv {temp}/tt_rev.fastq {temp}/rev.fastq
+    mv {temp}/tt_unp.fastq {temp}/unp.fastq
+    """.format(temp = temp_folder, threads = threads, log_file = logfile), shell = True)
 else :
     print("Other preprocesssing then 'none' not implemented yet")
     system.exit(0)
+
+if config_file['assemblies'][ass_name]['keep_unpaired'] :
+    unp = "-r  {temp}/unp.fastq "
+else :
+    unp = ""
+
+title2log("Running megahit".format(ass_name = ass_name), logfile)
+
+megahit_line = "megahit -m 0.9 -1 {temp}/fwd.fastq -2 {temp}/rev.fastq " + unp + "-t {threads} -o {temp}/assembly --min-contig-len {min_len} 2> {log}"
+
 
 title2log("assembling {ass_name}".format(ass_name = ass_name), logfile)
 
