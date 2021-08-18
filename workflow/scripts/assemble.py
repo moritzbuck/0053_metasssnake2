@@ -26,14 +26,16 @@ freetxt_line("Creating temp folder: " + temp_folder, logfile)
 
 os.makedirs(temp_folder, exist_ok=True)
 
-title2log("Ungzipping and cat-ing libs to temp_folder".format(ass_name = ass_name), logfile)
+title2log("cat-ing libs to temp_folder".format(ass_name = ass_name), logfile)
 
 for lib in config_file['assemblies'][ass_name]['libraries']:
     call("""
-    unpigz -kc {root_folder}/libraries/{lname}/{lname}_fwd.fastq.gz >> {temp}/fwd.fastq
-    unpigz -kc {root_folder}/libraries/{lname}/{lname}_rev.fastq.gz >> {temp}/rev.fastq
-    unpigz -kc {root_folder}/libraries/{lname}/{lname}_unp.fastq.gz >> {temp}/unp.fastq
+    cat {root_folder}/libraries/{lname}/{lname}_fwd.fastq.gz >> {temp}/fwd.fastq.gz
+    cat {root_folder}/libraries/{lname}/{lname}_rev.fastq.gz >> {temp}/rev.fastq.gz
+    cat {root_folder}/libraries/{lname}/{lname}_unp.fastq.gz >> {temp}/unp.fastq.gz
     """.format(root_folder = root_folder, lname = lib, temp=temp_folder), shell=True)
+
+
 
 if config_file['assemblies'][ass_name]['preprocess'] == 'none':
     pass
@@ -41,47 +43,76 @@ elif config_file['assemblies'][ass_name]['preprocess'] == 'bbnorm':
     title2log("Running bbnorm diginorm".format(ass_name = ass_name), logfile)
 
     call("""
-    bbnorm.sh in={temp}/fwd.fastq in2={temp}/rev.fastq out={temp}/tt_fwd.fastq out2={temp}/tt_rev.fastq t={threads} 2>> {log_file}
-    bbnorm.sh in={temp}/unp.fastq out={temp}/tt_unp.fastq t={threads} 2>> {log_file}
-    mv {temp}/tt_fwd.fastq {temp}/fwd.fastq
-    mv {temp}/tt_rev.fastq {temp}/rev.fastq
-    mv {temp}/tt_unp.fastq {temp}/unp.fastq
+    bbnorm.sh -Xmx100g in={temp}/fwd.fastq.gz in2={temp}/rev.fastq.gz out={temp}/tt_fwd.fastq.gz out2={temp}/tt_rev.fastq.gz t={threads} 2>> {log_file}
+    bbnorm.sh -Xmx100g in={temp}/unp.fastq.gz out={temp}/tt_unp.fastq.gz t={threads} 2>> {log_file}
+    mv {temp}/tt_fwd.fastq.gz {temp}/fwd.fastq.gz
+    mv {temp}/tt_rev.fastq.gz {temp}/rev.fastq.gz
+    mv {temp}/tt_unp.fastq.gz {temp}/unp.fastq.gz
     """.format(temp = temp_folder, threads = threads, log_file = logfile), shell = True)
 else :
-    print("Other preprocesssing then 'none' not implemented yet")
+    print("Other preprocesssing then 'none' or 'bbnorm' not implemented yet")
     system.exit(0)
 
-if config_file['assemblies'][ass_name]['keep_unpaired'] :
-    unp = "-r  {temp}/unp.fastq "
-else :
-    unp = ""
-
-title2log("Running megahit".format(ass_name = ass_name), logfile)
-
-megahit_line = "megahit -m 0.9 -1 {temp}/fwd.fastq -2 {temp}/rev.fastq " + unp + "-t {threads} -o {temp}/assembly --min-contig-len {min_len} 2> {log}"
-
-
-title2log("assembling {ass_name}".format(ass_name = ass_name), logfile)
-
-call(megahit_line.format(temp = temp_folder, threads = threads, min_len = config_file['assemblies'][ass_name]['length_cutoff'], log = "{out_folder}/logs/megahit.log".format(out_folder = out_folder)), shell = True)
+if config_file['assemblies'][ass_name]['assembler'] == 'megahit':
+    if config_file['assemblies'][ass_name]['keep_unpaired'] :
+        unp = "-r  {temp}/unp.fastq.gz "
+    else :
+        unp = ""
+    title2log("Running megahit".format(ass_name = ass_name), logfile)
+    megahit_line = "megahit -m 0.9 -1 {temp}/fwd.fastq.gz -2 {temp}/rev.fastq.gz " + unp + "-t {threads} -o {temp}/assembly --min-contig-len {min_len} 2> {log}"
 
 
-title2log("Cleaning up and moving {ass_name}".format(ass_name = ass_name), logfile)
+    title2log("assembling {ass_name}".format(ass_name = ass_name), logfile)
+    call(megahit_line.format(temp = temp_folder, threads = threads, min_len = config_file['assemblies'][ass_name]['length_cutoff'], log = "{out_folder}/logs/megahit.log".format(out_folder = out_folder)), shell = True)
 
-nb_contigs = len([ None for s in tqdm(SeqIO.parse(pjoin(temp_folder, "assembly", "final.contigs.fa"), "fasta"))])
-zeros = len(str(nb_contigs))
+    title2log("Cleaning up and moving {ass_name}".format(ass_name = ass_name), logfile)
+    nb_contigs = len([ None for s in tqdm(SeqIO.parse(pjoin(temp_folder, "assembly", "final.contigs.fa"), "fasta"))])
+    max_buffer_size = config_file['seqio_buffer_size']
+    zeros = len(str(nb_contigs))
 
-max_buffer_size = config_file['seqio_buffer_size']
-buffer = []
-with open(pjoin(out_folder, "assembly.fna"), "w") as handle:
-    for i,s in tqdm(enumerate(SeqIO.parse(pjoin(temp_folder, "assembly", "final.contigs.fa"), "fasta"))):
-        s.id = ass_name + "_" + str(i+1).zfill(zeros)
-        s.description = ""
-        buffer += [s]
-        if len(buffer) > max_buffer_size:
+
+    buffer = []
+    with open(pjoin(out_folder, "assembly.fna"), "w") as handle:
+        for i,s in tqdm(enumerate(SeqIO.parse(pjoin(temp_folder, "assembly", "final.contigs.fa"), "fasta"))):
+            s.id = ass_name + "_" + str(i+1).zfill(zeros)
+            s.description = ""
+            buffer += [s]
+            if len(buffer) > max_buffer_size:
+                SeqIO.write(buffer, handle, "fasta")
+                buffer = []
+        SeqIO.write(buffer, handle, "fasta")
+elif config_file['assemblies'][ass_name]['assembler'] == 'spades':
+        if config_file['assemblies'][ass_name]['keep_unpaired'] :
+            unp = "-s  {temp}/unp.fastq.gz "
+        else :
+            unp = ""
+        title2log("Running spades".format(ass_name = ass_name), logfile)
+        megahit_line = "spades.py --meta -1 {temp}/fwd.fastq.gz -2 {temp}/rev.fastq.gz " + unp + "-t {threads} -o {temp}/assembly > {log}"
+
+
+        title2log("assembling {ass_name}".format(ass_name = ass_name), logfile)
+        call(megahit_line.format(temp = temp_folder, threads = threads, log = "{out_folder}/logs/spades.log".format(out_folder = out_folder)), shell = True)
+
+        title2log("Cleaning up and moving {ass_name}".format(ass_name = ass_name), logfile)
+        nb_contigs = len([ None for s in tqdm(SeqIO.parse(pjoin(temp_folder, "assembly", "scaffolds.fasta"), "fasta"))])
+        zeros = len(str(nb_contigs))
+
+        max_buffer_size = config_file['seqio_buffer_size']
+        buffer = []
+        shutil.copy(pjoin(temp_folder, "assembly",'assembly_graph.fastg'), pjoin(out_folder, 'assembly.fastg') )
+        with open(pjoin(out_folder, "assembly.fna"), "w") as handle:
+            for i,s in tqdm(enumerate(SeqIO.parse(pjoin(temp_folder, "assembly", "scaffolds.fasta"), "fasta"))):
+                if len(s) > config_file['assemblies'][ass_name]['length_cutoff']:
+                    s.id = ass_name + "_" + str(i+1).zfill(zeros)
+                    s.description = ""
+                    buffer += [s]
+                    if len(buffer) > max_buffer_size:
+                        SeqIO.write(buffer, handle, "fasta")
+                        buffer = []
             SeqIO.write(buffer, handle, "fasta")
-            buffer = []
-    SeqIO.write(buffer, handle, "fasta")
+else :
+    print("Other assembler than 'megahit' and 'spades' not implemented yet")
+    system.exit(0)
 
 
 shutil.rmtree(temp_folder)

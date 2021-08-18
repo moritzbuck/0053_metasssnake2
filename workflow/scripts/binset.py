@@ -1,13 +1,20 @@
 import sys, os
 from tqdm import tqdm
 from os.path import join as pjoin
-from workflow.scripts.utils import generate_config, title2log, freetxt_line, dict2file
+sys.path.append(os.getcwd())
+
+from workflow.scripts.utils import generate_config, title2log, freetxt_line, dict2file, gff2anvio
 import shutil
 from subprocess import call
 from os.path import basename
 import json
 from Bio import SeqIO
 import re
+from anvio.summarizer import ContigSummarizer
+from tempfile import NamedTemporaryFile
+from Bio.SeqRecord import SeqRecord
+from Bio.Seq import Seq
+from anvio.dbops import ContigsSuperclass
 
 script , binset_name, config_file, root_folder, out_folder, threads = sys.argv
 
@@ -53,7 +60,7 @@ for f in os.listdir(tbinfoder):
 
 title2log("Running checkm", logfile)
 
-call("checkm lineage_wf -x fna -t 24 {temp}/bins/ {temp}/checkm > {temp}/checkm.txt  2>> {logfile}".format(temp = temp_folder, logfile = logfile), shell = True)
+#call("checkm lineage_wf -x fna -t 24 {temp}/bins/ {temp}/checkm > {temp}/checkm.txt  2>> {logfile}".format(temp = temp_folder, logfile = logfile), shell = True)
 
 with open(pjoin(temp_folder, "checkm.txt")) as handle:
     all_lines = [l.strip() for l in  handle.readlines() if " INFO:" not in l]
@@ -75,7 +82,7 @@ for f in os.listdir(tbinfoder):
             append2unkept(f)
         os.remove(pjoin(tbinfoder, f))
 
-title2log("Parsing and filtering based faa/fnas", logfile)
+title2log("Parsing and filtering based on faa/fnas", logfile)
 
 for f in os.listdir(tbinfoder):
     fna = list(SeqIO.parse(pjoin(tbinfoder, f), "fasta"))
@@ -92,10 +99,11 @@ for f in os.listdir(tbinfoder):
 
 
 title2log("Running prokka for the bins", logfile)
+title2log("Live hacking prokka script to allow for long contig names", logfile)
 
 
 call("sed -i 's/my $MAXCONTIGIDLEN = 37/my $MAXCONTIGIDLEN = 250/' `which prokka` ", shell=True)
-#call("sed -i 's/[^#]tbl2asn -V/#tbl2asn -V/' `which prokka` ", shell=True)
+call("sed -i 's/[^#]tbl2asn -V/#tbl2asn -V/' `which prokka` ", shell=True)
 
 if keep_fails:
     nb_contigs = len([ None for s in tqdm(SeqIO.parse(pjoin(temp_folder, "clean_bins", binset_name + "_unkept.fna"), "fasta"))])
@@ -104,7 +112,7 @@ if keep_fails:
     buffer = []
     with open(pjoin(temp_folder, "clean_bins", binset_name + "_unkept2.fna"), "w") as handle:
         for i,s in tqdm(enumerate(SeqIO.parse(pjoin(temp_folder, "clean_bins", binset_name + "_unkept.fna"), "fasta"))):
-            s.id = binset_name + "-kept_" + str(i+1).zfill(zeros) + ";" + s.id
+            s.id = binset_name + "-kept_" + str(i+1).zfill(zeros) + "__" + s.id
             s.description = ""
             buffer += [s]
             if len(buffer) > max_buffer_size:
@@ -118,16 +126,79 @@ os.remove(pjoin(cbinfoder, binset_name + "_unkept.fna"))
 
 call("ls {temp}/bins/ | cut -f1 -d. | parallel -j{threads} prokka --outdir {temp}/clean_bins/{{}} --prefix {{}} --locustag {{}} --cpus 1 {temp}/bins/{{}}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder), shell = True)
 
-for g in checkm_out:
-    fna = [s.seq for s in SeqIO.parse(pjoin(cbinfoder, g, g +".fna"), "fasta")]
-    faa = [s.seq for s in SeqIO.parse(pjoin(cbinfoder, g, g +".faa"), "fasta")]
-    checkm_out[g]['nb_contigs'] = len(fna)
-    checkm_out[g]['bin_len'] = sum([len(s) for s in fna])
-    checkm_out[g]['nb_cdss'] = len(faa)
-    checkm_out[g]['acoding_density'] = sum([len(s)*3 for s in faa])/checkm_out[g]['bin_len']
+title2log("Creating anvi'o databases", logfile)
+
+formating_dat = {
+'out_folder' : out_folder,
+'temp_folder' : temp_folder,
+'threads' : threads,
+'binset_name' : binset_name
+}
+make_dbs_line = """ls {temp_folder}/clean_bins/ | grep _bin- | parallel -j{threads} anvi-gen-contigs-database --ignore-internal-stop-codons --quiet -n {binset_name} -f {temp_folder}/clean_bins/{{}}/{{}}.fna -o {temp_folder}/clean_bins/{{}}/{{}}.db -T 1 --external-gene-calls {temp_folder}/clean_bins/{{}}/{{}}.cdss
+ls {temp_folder}/clean_bins/ | grep _bin- | parallel -j{threads} anvi-import-functions --quiet -c {temp_folder}/clean_bins/{{}}/{{}}.db -i {temp_folder}/clean_bins/{{}}/{{}}.annot"""
+for bin_id in tqdm(os.listdir(pjoin(temp_folder, "clean_bins"))):
+    if "_bin-" in bin_id:
+        prokka_out = gff2anvio(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".gff"))
+        with open(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".annot"), "w") as handle:
+            handle.writelines(prokka_out['annot'])
+        with open(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".cdss"), "w") as handle:
+            handle.writelines(prokka_out['cdss'])
+
+call(make_dbs_line.format(**formating_dat), shell = True)
+title2log("done with anvi'o databases", logfile)
 
 
-dict2file(checkm_out, pjoin(out_folder, binset_name + "_basics.csv"))
+anvi_pipe = ['anvi-run-hmms', 'anvi-run-kegg-kofams', 'anvi-run-scg-taxonomy']#, 'anvi-run-pfams']
+anvi_line = "ls {temp_folder}/clean_bins/ | grep _bin- | parallel -j{threads} {program} --quiet --tmp-dir  {temp_folder} -c {temp_folder}/clean_bins/{{}}/{{}}.db -T {threads}"
+
+title2log("Starting anvio pipe".format(**formating_dat), logfile)
+
+for program in anvi_pipe:
+    formating_dat['program'] = program
+    title2log("running {program} on anvi'o databases".format(**formating_dat), logfile)
+    call(anvi_line.format(**formating_dat), shell = True)
+
+class mock:
+     def __init__(self):
+         self.__dict__ = {}
+params = mock()
+
+stats = {}
+fields = ['project_name', 'contigs_db_hash', 'num_contigs', 'total_length', 'creation_date', 'gc_content', 'num_genes', 'percent_completion', 'percent_redundancy', 'scg_domain', 'scg_domain_confidence']
+get_taxo_line = "anvi-estimate-scg-taxonomy --quiet -T {threads} -c {temp_folder}/clean_bins/{bin_id}/{bin_id}.db -o {tempfile}"
+head = ["d__", "p__", "c__", "o__", "f__", "g__", "s__"]
+for bin_id in tqdm(os.listdir(pjoin(temp_folder, "clean_bins"))):
+    if os.path.isdir(pjoin(temp_folder, "clean_bins", bin_id)):
+        tt = ContigSummarizer(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".db")).get_contigs_db_info_dict(gene_caller_to_use="Prodigal")
+        t_file = NamedTemporaryFile()
+        formating_dat['bin_id'] = bin_id
+        formating_dat['tempfile'] = t_file.name
+        call(get_taxo_line.format(**formating_dat), shell = True)
+        with open(t_file.name) as handle:
+            handle.readline().split()
+            scg_taxo = handle.readline().strip().split("\t")
+        params.__dict__['contigs_db'] = pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".db")
+        c = ContigsSuperclass(params)
+        calls = c.get_sequences_for_gene_callers_ids(simple_headers=False)[1]
+        with open(pjoin(temp_folder, binset_name + ".faa"), "a") as handle:
+            seqs = []
+            for k,v in calls.items():
+                ss = Seq(v['sequence']).translate()
+                seqs.append(SeqRecord(ss, id = bin_id + ";" + str(k), description = ""))
+            SeqIO.write(seqs, handle, "fasta")
+
+        utils.export_sequences_from_contigs_db(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".db"), t_file.name)
+        call("cat {tempfile} >> {temp_folder}/{binset_name}.fna".format(**formating_dat), shell = True)
+        t_file.close()
+        est_coding = tt['avg_gene_length']*tt['num_genes']/tt['total_length']
+        tt = {k : v for k,v in tt.items() if k in fields}
+        stats[bin_id] = tt
+        stats[bin_id]['scg_taxo_support'] = scg_taxo[1] + "/" + scg_taxo[2]
+        stats[bin_id]['scg_taxo'] = ";".join([h+t for h,t in  zip(head,scg_taxo[3:])])
+        stats[bin_id]['approx_coding_density'] = est_coding
+        pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".db")
+
+dict2file(stats, pjoin(out_folder, binset_name + "_basics.csv"))
 
 title2log("Cleaning up and moving the bins", logfile)
 

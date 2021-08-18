@@ -66,7 +66,7 @@ assemblies_fields =  {
         'type' : str
     },
     'assembler' : {
-        'possibles' : ['megahit'],
+        'possibles' : ['megahit', 'spades'],
         'default' : 'megahit'
     },
     'preprocess' : {

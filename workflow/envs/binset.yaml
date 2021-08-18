@@ -7,5 +7,53 @@ dependencies:
   - checkm-genome
   - tqdm
   - biopython
-  - prokka
-  - blast=2.2.31
+  - prokka=1.13.4
+  - pandas==0.25.1
+  - gffutils
+  - numpy
+  - bottle
+  - pysam
+  - ete3
+  - scipy
+  - scikit-learn >=0.23.2
+  - django
+  - requests
+  - psutil ==5.4.3
+  - mistune
+  - six
+  - matplotlib-base
+  - statsmodels
+  - colored
+  - illumina-utils
+  - tabulate
+  - numba
+  - sqlite >=3.31.1
+  - paste
+  - vmatch
+  - pyani ==0.2.10
+  - snakemake-minimal ==5.10.0
+  - prodigal
+  - mcl
+  - muscle
+  - hmmer
+  - diamond
+  - blast>2.2
+  - megahit
+  - spades
+  - bowtie2
+  - bwa
+  - samtools
+  - centrifuge
+  - trimal
+  - iqtree
+  - fastani
+  - trnascan-se
+  - r-base
+  - r-stringi
+  - r-tidyverse
+  - r-magrittr
+  - r-optparse
+  - bioconductor-qvalue
+  - fasttree
+  - vmatch
+  - anvio
