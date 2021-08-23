@@ -96,5 +96,16 @@ rule binsetting:
     params : script = "workflow/scripts/binset.py", config_file = config['config_file']
     conda : "../envs/binset.yaml"
     shell : """
+        export PYTHONPATH=`pwd`
+        if [ ! -f $CONDA_PREFIX/bin/anvi-setup-scg-taxonomy ]
+        then
+            ori=`pwd`
+            cd $CONDA_PREFIX/opt/
+            git clone git@github.com:merenlab/anvio.git
+            cd anvio
+            python setup.py install
+            cd $ori
+        fi
+
         python {params.script} {wildcards.binset_name} {params.config_file} {wildcards.root} {wildcards.root}/binsets/{wildcards.binset_name}/ {threads}
         """
