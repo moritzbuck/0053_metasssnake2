@@ -13,17 +13,19 @@ from workflow._version import __version__
 
 def trystr2int(i):
     try:
-        return int(i)
+        return float(i)
     except ValueError:
         return i
 
-def csv2dict(file):
+def csv2dict(file, sep = ","):
     with open(file) as handle:
         lines = [l.strip() for l in handle.readlines() if not l.startswith("#")]
-        header = lines[0].split(",")[1:]
-        data = {l.split(",")[0] : l.split(",")[1:]  for l in lines[1:]}
+        header = lines[0].split(sep)[1:]
+        data = {l.split(sep)[0] : l.split(sep)[1:]  for l in lines[1:]}
         data = {k : {kk : trystr2int(vv) for kk,vv in zip(header,v)} for k,v in data.items()}
     return data
+
+
 
 def dict2file(dd, file):
     cols = list(list(dd.values())[0].keys())
@@ -47,7 +49,11 @@ def validate_field(value, validator, name):
         assert value in validator['possibles'] or all([vv in validator['possibles'] for vv in value.split(";")]), 'The value(s) of the field "' + name + '" is(are) '+ str(value) + ', and should be in {}'.format(validator['possibles'])
     if 'type' in validator:
         assert is_type(value,validator['type']), 'The value of the field "' + name + '" should be convertible to {}'.format(validator['type'].__name__)
-        value = validator['type'](value)
+        if   validator['type'] == bool:
+            assert value in ["True", "False"],  'The value of the field "' + name + '" should be either "True" or "False"'
+            value = value == "True"
+        else :
+            value = validator['type'](value)
         if 'min' in validator:
             assert value > validator['min'], 'The value of the field "' + name + '" should be larger then ' + str(validator['min'])
         if 'max' in validator:
@@ -132,6 +138,19 @@ def generate_config(file_or_dict):
 
             binsets_dat[k] = v
         config_dat['binsets'] = binsets_dat
+
+        mappings_dat = csv2dict(config_dat['mappings_file'])
+        for k,v in mappings_dat.items():
+            for field in necessary_mappings_fields:
+                assert field in v, field + " needs to be in the mappings file"
+            v.update({kk : validate_field(mappings_dat[k].get(kk), mappings_fields[kk], kk) for kk in mappings_fields})
+            v['libraries'] = v['libraries'].split(";")
+            for lib in v['libraries']:
+                assert lib in config_dat['libraries'],  "no such library as " + lib + " for your mapping " + k
+            assert v['binset'] in config_dat['binsets'],  "no such binset as " + v['binset'] + " for your mapping " + k
+
+            mappings_dat[k] = v
+        config_dat['mappings'] = mappings_dat
     except AssertionError as err:
         print("ERROR : config not valid\nERROR {err}\nERROR Check the doc for formating advice".format(err = err), file = sys.stderr)
         return None

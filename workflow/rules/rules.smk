@@ -109,3 +109,22 @@ rule binsetting:
 
         python {params.script} {wildcards.binset_name} {params.config_file} {wildcards.root} {wildcards.root}/binsets/{wildcards.binset_name}/ {threads}
         """
+
+def get_binset(wildcards):
+    return "{root}/binsets/{binset}/{binset}.fna".format(root = wildcards.root, binset = config['mappings'][wildcards.mapping_name]['binset'])
+
+
+rule mapping:
+    input : get_binset, unpack(lambda wildcards :  [ "{root}/libraries/{lib}/{lib}_fwd.fastq.gz".format(root = wildcards.root, lib = lib) for lib in config['mappings'][wildcards.mapping_name]['libraries'] ])
+    output :
+        mapping_table = "{root}/mappings/{mapping_name}/contigs_relative_abundance.csv"
+    log :
+        log = "{root}/mappings/{mapping_name}/logs/mapping.log",
+        env = "{root}/mappings/{mapping_name}/logs/mapping.yaml",
+        settings = "{root}/mappings/{mapping_name}/logs/mapping_settings.json"
+    threads : 24
+    params : script = "workflow/scripts/mapping.py", config_file = config['config_file']
+    conda : "../envs/mapping.yaml"
+    shell : """
+        python {params.script} {wildcards.mapping_name} {params.config_file} {wildcards.root} {wildcards.root}/mappings/{wildcards.mapping_name}/ {threads}
+        """

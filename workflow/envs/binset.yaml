@@ -67,3 +67,4 @@ dependencies:
   - charset-normalizer==2.0.0
   - sqlparse==0.4.1
   - jupyter_core==4.7.1
+  - motulizer==0.3.1

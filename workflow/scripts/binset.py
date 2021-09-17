@@ -3,7 +3,7 @@ from tqdm import tqdm
 from os.path import join as pjoin
 sys.path.append(os.getcwd())
 
-from workflow.scripts.utils import generate_config, title2log, freetxt_line, dict2file, gff2anvio
+from workflow.scripts.utils import generate_config, title2log, freetxt_line, dict2file, gff2anvio, csv2dict
 import shutil
 from subprocess import call
 from os.path import basename
@@ -61,10 +61,11 @@ for f in os.listdir(tbinfoder):
 
 title2log("Running checkm", logfile)
 
-call("checkm lineage_wf -x fna -t 24 {temp}/bins/ {temp}/checkm > {temp}/checkm.txt  2>> {logfile}".format(temp = temp_folder, logfile = logfile), shell = True)
+call("checkm lineage_wf --pplacer_threads {threads} -x fna -t {threads} {temp}/bins/ {temp}/checkm > {temp}/checkm.txt  2>> {logfile}".format(temp = temp_folder, logfile = logfile, threads = threads), shell = True)
 
 with open(pjoin(temp_folder, "checkm.txt")) as handle:
     all_lines = [l.strip() for l in  handle.readlines() if " INFO:" not in l]
+
 
 title2log("Parsing and filtering based on checkm", logfile)
 
@@ -75,15 +76,25 @@ header_line = all_lines[header_lines]
 lines = [l for i,l in enumerate(all_lines) if i != header_lines and len(l) == len(header_line)]
 lines = [{a : b if a in ['Marker lineage', 'Bin Id'] else float(b) for a,b in zip(header_line,l) }for l in lines]
 
+nb_bins = len(lines)
+freetxt_line(f"{nb_bins} bins collected", logfile)
+
 checkm_out = {l['Bin Id'] : {k: l[k] for k in ('Completeness', 'Contamination', 'Strain heterogeneity')} for l in lines if l['Completeness'] > min_completeness and l['Contamination'] < max_contamination}
 
+
+removed = 0
 for f in os.listdir(tbinfoder):
     if f[:-4] not in checkm_out:
         if keep_fails:
             append2unkept(f)
         os.remove(pjoin(tbinfoder, f))
+        removed += 1
+
+nb_bins = len(checkm_out)
+freetxt_line(f"{removed} bins removed, {nb_bins} left", logfile)
 
 title2log("Parsing and filtering based on faa/fnas", logfile)
+
 
 for f in os.listdir(tbinfoder):
     fna = list(SeqIO.parse(pjoin(tbinfoder, f), "fasta"))
@@ -91,12 +102,19 @@ for f in os.listdir(tbinfoder):
     checkm_out[f[:-4]]['length'] = sum([len(s) for s in fna])
     checkm_out[f[:-4]]['acoding_density'] = 3*sum([len(s) for s in faa])/checkm_out[f[:-4]]['length']
 
+with open("tt.json", "w") as handle:
+    json.dump(checkm_out, handle, indent = 2 , sort_keys = True)
+removed = 0
 for f in os.listdir(tbinfoder):
     if checkm_out[f[:-4]]['acoding_density'] < min_coding:
         if keep_fails:
             append2unkept(f)
         os.remove(pjoin(tbinfoder, f))
+        removed += 1
         del checkm_out[f[:-4]]
+
+nb_bins = len(checkm_out)
+freetxt_line(f"{removed} bins removed, {nb_bins} left", logfile)
 
 
 title2log("Running prokka for the bins", logfile)
@@ -119,12 +137,21 @@ if keep_fails:
                 SeqIO.write(buffer, handle, "fasta")
                 buffer = []
         SeqIO.write(buffer, handle, "fasta")
-
-shutil.move(pjoin(temp_folder, "clean_bins", binset_name + "_unkept2.fna"),pjoin(temp_folder, "clean_bins", binset_name + "_unkept.fna"))
-call("prokka --outdir {temp}/clean_bins/{binset}_unkept --prefix {binset}_unkept --locustag {binset}_unkept --metagenome --cpus {threads} {temp}/clean_bins/{binset}_unkept.fna >> {logfile}  2>&1".format(threads= threads, binset = binset_name, temp=temp_folder, logfile = logfile), shell=True)
-os.remove(pjoin(cbinfoder, binset_name + "_unkept.fna"))
+    shutil.move(pjoin(temp_folder, "clean_bins", binset_name + "_unkept2.fna"),pjoin(temp_folder, "clean_bins", binset_name + "_unkept.fna"))
+    call("prokka --outdir {temp}/clean_bins/{binset}_unkept --prefix {binset}_unkept --locustag {binset}_unkept --metagenome --cpus {threads} {temp}/clean_bins/{binset}_unkept.fna >> {logfile}  2>&1".format(threads= threads, binset = binset_name, temp=temp_folder, logfile = logfile), shell=True)
+    os.remove(pjoin(cbinfoder, binset_name + "_unkept.fna"))
 
 call("ls {temp}/bins/ | cut -f1 -d. | parallel -j{threads} prokka --outdir {temp}/clean_bins/{{}} --prefix {{}} --locustag {{}} --cpus 1 {temp}/bins/{{}}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder), shell = True)
+to_redo = []
+for bin_ in os.listdir(f"{temp_folder}/clean_bins/"):
+    if not os.path.exists(f"{temp_folder}/clean_bins/{bin_}/{bin_}.gff"):
+        to_redo += [bin_]
+
+title2log(f"have to rerun {len(to_redo)} prokkas for unknown reasons", logfile)
+
+for f in tqdm(to_redo):
+    call("prokka --force --outdir {temp}/clean_bins/{f} --prefix {f} --locustag {f} --cpus {threads} {temp}/bins/{f}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder, f = f), shell = True)
+
 
 title2log("Creating anvi'o databases", logfile)
 
@@ -134,8 +161,10 @@ formating_dat = {
 'threads' : threads,
 'binset_name' : binset_name
 }
+
 make_dbs_line = """ls {temp_folder}/clean_bins/  | parallel -j{threads} anvi-gen-contigs-database --ignore-internal-stop-codons --quiet -n {binset_name} -f {temp_folder}/clean_bins/{{}}/{{}}.fna -o {temp_folder}/clean_bins/{{}}/{{}}.db -T 1 --external-gene-calls {temp_folder}/clean_bins/{{}}/{{}}.cdss
 ls {temp_folder}/clean_bins/  | parallel -j{threads} anvi-import-functions --quiet -c {temp_folder}/clean_bins/{{}}/{{}}.db -i {temp_folder}/clean_bins/{{}}/{{}}.annot"""
+
 for bin_id in tqdm(os.listdir(pjoin(temp_folder, "clean_bins"))):
         prokka_out = gff2anvio(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".gff"))
         with open(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".annot"), "w") as handle:
@@ -146,13 +175,15 @@ for bin_id in tqdm(os.listdir(pjoin(temp_folder, "clean_bins"))):
 call(make_dbs_line.format(**formating_dat), shell = True)
 title2log("done with anvi'o databases", logfile)
 
-call("""
-anvi-setup-scg-taxonomy --quiet
-anvi-setup-kegg-kofams --quiet
+title2log("pulling anvi'o dataSets for annot if needed", logfile)
+
+call(f"""
+anvi-setup-scg-taxonomy --quiet >> {logfile}  2>&1
+anvi-setup-kegg-kofams --quiet >> {logfile}  2>&1
 """, shell = True)
 
 anvi_pipe = ['anvi-run-hmms', 'anvi-run-kegg-kofams', 'anvi-run-scg-taxonomy']#, 'anvi-run-pfams']
-anvi_line = "ls {temp_folder}/clean_bins/  | parallel -j{threads} {program} --quiet --tmp-dir  {temp_folder} -c {temp_folder}/clean_bins/{{}}/{{}}.db -T {threads}"
+anvi_line = "ls {temp_folder}/clean_bins/  | parallel -j{threads} {program} --quiet --tmp-dir  {temp_folder} -c {temp_folder}/clean_bins/{{}}/{{}}.db -T {threads} >> {logfile}  2>&1"
 
 title2log("Starting anvio pipe".format(**formating_dat), logfile)
 
@@ -196,7 +227,6 @@ for bin_id in tqdm(os.listdir(pjoin(temp_folder, "clean_bins"))):
         est_coding = tt['avg_gene_length']*tt['num_genes']/tt['total_length']
         tt = {k : v for k,v in tt.items() if k in fields}
         stats[bin_id] = tt
-        print(bin_id, scg_taxo)
         if scg_taxo[0] != '':
             stats[bin_id]['scg_taxo_support'] = scg_taxo[1] + "/" + scg_taxo[2]
             stats[bin_id]['scg_taxo'] = ";".join([h+t for h,t in  zip(head,scg_taxo[3:])])
@@ -205,6 +235,22 @@ for bin_id in tqdm(os.listdir(pjoin(temp_folder, "clean_bins"))):
             stats[bin_id]['scg_taxo'] = 'NA'
         stats[bin_id]['approx_coding_density'] = est_coding
         pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".db")
+
+call("mOTUlize.py -o {temp_folder}/motulize.tsv  --checkm {temp_folder}/checkm.txt --fnas {temp_folder}/clean_bins/*/*.fna --threads {threads} --prefix {binset_name}_mOTU_ --keep-simi-file {temp_folder}/anis.tsv --force".format(**formating_dat), shell = True)
+
+motupan_dat = csv2dict(pjoin(temp_folder,"motulize.tsv"), sep="\t")
+
+shutil.move(pjoin(temp_folder, "motulize.tsv"), out_folder)
+shutil.move(pjoin(temp_folder, "anis.tsv"), out_folder)
+
+for k,v in motupan_dat.items():
+    bins = v.get('MAGs', "").split(";") + v.get('SUBs', "").split(";")
+    for vv in bins:
+        if vv != "":
+            stats[vv]['mOTU'] = k
+            stats[vv]['representative'] = v['representative']
+
+
 
 dict2file(stats, pjoin(out_folder, binset_name + "_basics.csv"))
 

@@ -152,3 +152,34 @@ binsets_fields =  {
         'possibles' : ['gtdbtk+sourmash', 'eggnogmapper', 'anvioscg', 'motulize' ]
     },
 }
+
+necessary_mappings_fields = ['binset', 'libraries']
+mappings_fields =  {
+    'libraries' : {
+        'type' : str
+    },
+    'binset' : {
+        'type' : str
+    },
+    'mapper' : {
+        'possibles' : ['bwa-mem2'],
+        'default' : 'bwa-mem2'
+    },
+    'subset' : {
+        'type' : bool,
+        'default' : False
+    },
+    'taxfield' : {
+    'type' : str,
+    'default' : 'scg_taxo'
+    },
+    'other_parameters' : {
+    'type' : str,
+    'default' : {}
+    },
+    'min_nucleotide_id' : {
+        'type' : float,
+        'default' : 50,
+        'min' : 0
+    },
+}
