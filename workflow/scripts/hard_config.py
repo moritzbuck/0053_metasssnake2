@@ -111,10 +111,11 @@ binnings_fields =  {
     }
 }
 
-necessary_binsets_fields = ['binnings']
+necessary_binsets_fields = []
 binsets_fields =  {
     'binnings' : {
-        'type' : str
+        'type' : str,
+        'default' : ""
     },
     'other_parameters' : {
         'type' : str,
@@ -146,6 +147,16 @@ binsets_fields =  {
         'type' : bool,
         'default' : True
     },
+    'external_bins' :
+    {
+    'type' : str,
+    'default' : ""
+    },
+    'binsets' :
+    {
+    'type' : str,
+    'default' : ""
+    },
     'additional_annotation' : {
         'type' : str,
         'default' : "",
@@ -162,6 +173,34 @@ mappings_fields =  {
         'type' : str
     },
     'mapper' : {
+        'possibles' : ['bwa-mem2'],
+        'default' : 'bwa-mem2'
+    },
+    'subset' : {
+        'type' : bool,
+        'default' : False
+    },
+    'taxfield' : {
+    'type' : str,
+    'default' : 'scg_taxo'
+    },
+    'other_parameters' : {
+    'type' : str,
+    'default' : {}
+    },
+    'min_nucleotide_id' : {
+        'type' : float,
+        'default' : 50,
+        'min' : 0
+    },
+}
+
+necessary_gene_clusters_fields = ['binset']
+gene_clusters_fields =  {
+    'binset' : {
+        'type' : str
+    },
+    'clustering' : {
         'possibles' : ['bwa-mem2'],
         'default' : 'bwa-mem2'
     },

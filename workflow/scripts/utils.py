@@ -132,10 +132,18 @@ def generate_config(file_or_dict):
             for field in necessary_binsets_fields:
                 assert field in v, field + " needs to be in the binsets file"
             v.update({kk : validate_field(binsets_dat[k].get(kk), binsets_fields[kk], kk) for kk in binsets_fields})
-            v['binnings'] = v['binnings'].split(";")
-            for bini in v['binnings']:
-                assert bini in config_dat['binnings'],  "no such binning as " + bini + " for your binset " + k
-
+            if v['external_bins']:
+                assert os.path.exists(v['external_bins']), "Your external bins folder does not exist"
+                assert len([o for o in os.listdir(v['external_bins']) if o.endswith(".fna")])
+            if v['binnings'] != "":
+                v['binnings'] = v['binnings'].split(";")
+                for bini in v['binnings']:
+                    assert bini in config_dat['binnings'],  "no such binning as " + bini + " for your binset " + k
+            if v['binsets'] != "":
+                v['binsets'] = v['binsets'].split(";")
+                for bini in v['binsets']:
+                    assert bini in binsets_dat,  "no such binset as " + bini + " for your binset-merging " + k
+            assert v['binsets'] != '' or v['binnings'] != '' or v['external_bins'] != '', "your binset needs at least one of ['binsets', 'binnings', 'external_bins']" 
             binsets_dat[k] = v
         config_dat['binsets'] = binsets_dat
 

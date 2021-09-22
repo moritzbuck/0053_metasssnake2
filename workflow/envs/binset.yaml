@@ -5,6 +5,7 @@ channels:
   - defaults
   - etetoolkit
 dependencies:
+  - python ==3.6*
   - checkm-genome
   - tqdm
   - biopython
@@ -45,8 +46,8 @@ dependencies:
   - bwa
   - samtools
   - centrifuge
-  - trimal
   - iqtree
+  - trimal
   - fastani
   - trnascan-se
   - r-base

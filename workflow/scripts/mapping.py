@@ -43,7 +43,7 @@ call("bwa-mem2 index {temp}/binset.fna >> {out_folder}/logs/mapping.log  2>&1".f
 
 freetxt_line("Starting mappings", logfile)
 coverages = {}
-total_bases = {}
+total_reads = {}
 for lib in config_file['mappings'][mapping_name]['libraries']:
     title2log("copying {subset}{lib} to temp_folder".format(lib = lib, subset = "subset_" if subset else ""), logfile)
     call("""
@@ -65,9 +65,9 @@ for lib in config_file['mappings'][mapping_name]['libraries']:
     call("""
     coverm filter -b {temp}/mapping.bam -o {temp}/mapping_filtered.bam --min-read-percent-identity {ani} --threads {threads} >> {out_folder}/logs/mapping.log  2>&1
     rm {temp}/mapping.bam >> {out_folder}/logs/mapping.log  2>&1
-    coverm contig  --bam-files {temp}/mapping_filtered.bam  --methods covered_bases  --threads {threads} > {temp}/mapping.tsv 2>> {out_folder}/logs/mapping.log
+    coverm contig  --bam-files {temp}/mapping_filtered.bam  --methods count  --threads {threads} > {temp}/mapping.tsv 2>> {out_folder}/logs/mapping.log
     rm {temp}/mapping_filtered.bam
-    cat {temp}/fwd.fastq {temp}/rev.fastq {temp}/unp.fastq | paste - - - - | cut -f 2 | tr -d '\n' | wc -c > {temp}/total_bases.txt
+    cat {temp}/fwd.fastq {temp}/rev.fastq {temp}/unp.fastq | wc -l > {temp}/total_reads_x4.txt
     """.format(temp=temp_folder, threads = threads, ani = ani,  out_folder = out_folder), shell=True)
 
     call("""
@@ -82,18 +82,18 @@ rm {temp}/unp.fastq
         for l in handle:
             ll = l.strip().split()
             coverages[lib][ll[0]] = float(ll[1])
-    with open(pjoin(temp_folder, "total_bases.txt")) as handle:
-        total_bases[lib] = int(handle.readline().strip())
+    with open(pjoin(temp_folder, "total_reads_x4.txt")) as handle:
+        total_reads[lib] = int(handle.readline().strip())/4
 
 title2log("Done with the mappings", logfile)
 
 title2log("Making tables", logfile)
 
-for k in total_bases:
-    coverages[k]['unmapped'] = total_bases[k] - sum(coverages[k].values())
+for k in total_reads:
+    coverages[k]['unmapped'] = total_reads[k] - sum(coverages[k].values())
 
-with open(pjoin(temp_folder, "total_bases_to_map.csv"), "w") as handle:
-    handle.writelines(["library,total_bases"] + [f"{k},{v}\n" for k,v in total_bases.items()])
+with open(pjoin(temp_folder, "total_reads_to_map.csv"), "w") as handle:
+    handle.writelines(["library,total_reads"] + [f"{k},{v}\n" for k,v in total_reads.items()])
 
 coverages = pandas.DataFrame.from_dict(coverages)
 (coverages/coverages.sum()).to_csv(pjoin(temp_folder, "contigs_relative_abundance.csv"), index_label = "contig_name")
@@ -104,9 +104,8 @@ coverages_by_bin = coverages.groupby("bin").sum()
 relab_by_bin = (coverages_by_bin/coverages_by_bin.sum())
 relab_by_bin.to_csv(pjoin(temp_folder, "bins_relative_abundance.csv"), index_label = "bin_name")
 
-csv2dict(pjoin(root_folder, "binsets", binset, "MOSAIC-MIME-testbinset_basics.csv" ))
 levels = ['domain', 'phylum', 'class', 'order', 'family', 'genus', 'species']
-bin_stats  = csv2dict(pjoin(root_folder, "binsets", binset, "MOSAIC-MIME-testbinset_basics.csv" ))
+bin_stats  = csv2dict(pjoin(root_folder, "binsets", binset, binset + "_basics.csv" ))
 
 
 taxas = [bin_stats.get(bin_, {taxfield : 'unmapped'})[taxfield] for bin_ in relab_by_bin.index]

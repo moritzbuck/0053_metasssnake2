@@ -23,3 +23,6 @@ rule all_asses :
 
 rule all_binnings :
     input : expand(pjoin(config['root_folder'], "binnings/{binni_name}/binned_assembly.fna"), binni_name = config['binnings'].keys())
+
+rule all_binsets :
+    input : expand(pjoin(config['root_folder'], "binsets/{binni_name}/{binni_name}.fna"), binni_name = config['binsets'].keys())

@@ -83,8 +83,14 @@ rule binning:
         python {params.script} {wildcards.binning_name} {params.config_file} {wildcards.root} {wildcards.root}/binnings/{wildcards.binning_name}/ {threads}
         """
 
+def get_binnings_and_sets(wildcards):
+    binings = [] if config['binsets'][wildcards.binset_name]['binnings'] == "" else ["{root}/binnings/{binning}/binned_assembly.fna".format(root = wildcards.root, binning = binning) for binning in config['binsets'][wildcards.binset_name]['binnings'] ]
+    binsets = [] if config['binsets'][wildcards.binset_name]['binsets'] == "" else ["{root}/binsets/{binset}/{binset}.fna".format(root = wildcards.root, binset = binset) for binset in config['binsets'][wildcards.binset_name]['binsets'] ]
+    external = [] if config['binsets'][wildcards.binset_name]['external_bins'] == "" else [ config['binsets'][wildcards.binset_name]['external_bins'] ]
+    return binings + binsets + external
+
 rule binsetting:
-    input : unpack(lambda wildcards :  [ "{root}/binnings/{binning}/binned_assembly.fna".format(root = wildcards.root, binning = binning) for binning in config['binsets'][wildcards.binset_name]['binnings'] ])
+    input : get_binnings_and_sets
     output :
         assembly_by_binset = "{root}/binsets/{binset_name}/{binset_name}.fna",
         binset_stats = "{root}/binsets/{binset_name}/{binset_name}_basics.csv"
@@ -127,4 +133,19 @@ rule mapping:
     conda : "../envs/mapping.yaml"
     shell : """
         python {params.script} {wildcards.mapping_name} {params.config_file} {wildcards.root} {wildcards.root}/mappings/{wildcards.mapping_name}/ {threads}
+        """
+
+rule gtdbtk:
+    input : "{root}/binsets/{binset}/{binset}.fna"
+    output :
+        gtdbtk_out = "{root}/mappings/{binset}/gtdbtk"
+    log :
+        log = "{root}/binsets/{binset}/logs/gtdbtk.log",
+        env = "{root}/binsets/{binset}/logs/gtdbtk.yaml",
+        settings = "{root}/binsets/{binset}/logs/gtdbtk_settings.json"
+    threads : 24
+    params : script = "workflow/scripts/binset2gtdbtk.py", config_file = config['config_file']
+    conda : "../envs/gtdbtk.yaml"
+    shell : """
+        python {params.script} None {params.config_file} {wildcards.root} {wildcards.root}/binsets/{wildcards.binset}/ {threads}
         """

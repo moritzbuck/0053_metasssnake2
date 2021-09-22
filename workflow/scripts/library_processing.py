@@ -134,6 +134,7 @@ title2log("Read sketching", logfile)
 
 sourmash_line = """
 sourmash compute --track-abundance --merge {lname} -k{k} --scaled {scale} {temp}/fwd.fastq {temp}/rev.fastq {temp}/unp.fastq -o {temp}/{lname}.sig -p {threads}  2>> {log}
+echo FIx sourmash line to sketch instead of compute
 """
 
 call(sourmash_line.format(k = config_file['libraries'][lib_name]['sourmash_k'], scale = config_file['libraries'][lib_name]['sourmash_scaled'], lname = lib_name, temp = temp_folder, threads = threads, log = pjoin(out_folder,  "logs/sourmash_compute.log")), shell=True)
