@@ -17,12 +17,12 @@ def trystr2int(i):
     except ValueError:
         return i
 
-def csv2dict(file, sep = ","):
+def csv2dict(file, sep = ",", castfoats = True):
     with open(file) as handle:
         lines = [l.strip() for l in handle.readlines() if not l.startswith("#")]
         header = lines[0].split(sep)[1:]
         data = {l.split(sep)[0] : l.split(sep)[1:]  for l in lines[1:]}
-        data = {k : {kk : trystr2int(vv) for kk,vv in zip(header,v)} for k,v in data.items()}
+        data = {k : {kk : trystr2int(vv) if castfoats else vv for kk,vv in zip(header,v)} for k,v in data.items()}
     return data
 
 
@@ -85,7 +85,7 @@ def generate_config(file_or_dict):
             assert param in config_dat, param + " should be in your config_file"
             assert os.path.exists(config_dat[param]), "The " + param + " file in your config does not exist, you have " + config_dat[param]
 
-        libraries_dat = csv2dict(config_dat['libraries_file'])
+        libraries_dat = csv2dict(config_dat['libraries_file'], castfoats = False)
         for k,v in libraries_dat.items():
             v.update({kk : validate_field(libraries_dat[k].get(kk), libraries_fields[kk], kk) for kk in libraries_fields})
             v['fwd'] = v['fwd'].split(";")
@@ -98,7 +98,7 @@ def generate_config(file_or_dict):
             libraries_dat[k] = v
         config_dat['libraries'] = libraries_dat
 
-        assemblies_dat = csv2dict(config_dat['assemblies_file'])
+        assemblies_dat = csv2dict(config_dat['assemblies_file'], castfoats = False)
         for k,v in assemblies_dat.items():
             for field in necessary_assemblies_fields:
                 assert field in v, field + " needs to be in the assemblies file"
@@ -110,7 +110,7 @@ def generate_config(file_or_dict):
 
         config_dat['assemblies'] = assemblies_dat
 
-        binnings_dat = csv2dict(config_dat['binnings_file'])
+        binnings_dat = csv2dict(config_dat['binnings_file'], castfoats = False)
         for k,v in binnings_dat.items():
             for field in necessary_binnings_fields:
                 assert field in v, field + " needs to be in the binnings file"
@@ -127,7 +127,7 @@ def generate_config(file_or_dict):
 
         config_dat['binnings'] = binnings_dat
 
-        binsets_dat = csv2dict(config_dat['binsets_file'])
+        binsets_dat = csv2dict(config_dat['binsets_file'], castfoats = False)
         for k,v in binsets_dat.items():
             for field in necessary_binsets_fields:
                 assert field in v, field + " needs to be in the binsets file"
@@ -143,11 +143,11 @@ def generate_config(file_or_dict):
                 v['binsets'] = v['binsets'].split(";")
                 for bini in v['binsets']:
                     assert bini in binsets_dat,  "no such binset as " + bini + " for your binset-merging " + k
-            assert v['binsets'] != '' or v['binnings'] != '' or v['external_bins'] != '', "your binset needs at least one of ['binsets', 'binnings', 'external_bins']" 
+            assert v['binsets'] != '' or v['binnings'] != '' or v['external_bins'] != '', "your binset needs at least one of ['binsets', 'binnings', 'external_bins']"
             binsets_dat[k] = v
         config_dat['binsets'] = binsets_dat
 
-        mappings_dat = csv2dict(config_dat['mappings_file'])
+        mappings_dat = csv2dict(config_dat['mappings_file'], castfoats = False)
         for k,v in mappings_dat.items():
             for field in necessary_mappings_fields:
                 assert field in v, field + " needs to be in the mappings file"
