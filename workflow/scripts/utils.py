@@ -146,19 +146,19 @@ def generate_config(file_or_dict):
             assert v['binsets'] != '' or v['binnings'] != '' or v['external_bins'] != '', "your binset needs at least one of ['binsets', 'binnings', 'external_bins']"
             binsets_dat[k] = v
         config_dat['binsets'] = binsets_dat
+        if "mappings_file" in config_dat:
+            mappings_dat = csv2dict(config_dat['mappings_file'], castfoats = False)
+            for k,v in mappings_dat.items():
+                for field in necessary_mappings_fields:
+                    assert field in v, field + " needs to be in the mappings file"
+                v.update({kk : validate_field(mappings_dat[k].get(kk), mappings_fields[kk], kk) for kk in mappings_fields})
+                v['libraries'] = v['libraries'].split(";")
+                for lib in v['libraries']:
+                    assert lib in config_dat['libraries'],  "no such library as " + lib + " for your mapping " + k
+                assert v['binset'] in config_dat['binsets'],  "no such binset as " + v['binset'] + " for your mapping " + k
 
-        mappings_dat = csv2dict(config_dat['mappings_file'], castfoats = False)
-        for k,v in mappings_dat.items():
-            for field in necessary_mappings_fields:
-                assert field in v, field + " needs to be in the mappings file"
-            v.update({kk : validate_field(mappings_dat[k].get(kk), mappings_fields[kk], kk) for kk in mappings_fields})
-            v['libraries'] = v['libraries'].split(";")
-            for lib in v['libraries']:
-                assert lib in config_dat['libraries'],  "no such library as " + lib + " for your mapping " + k
-            assert v['binset'] in config_dat['binsets'],  "no such binset as " + v['binset'] + " for your mapping " + k
-
-            mappings_dat[k] = v
-        config_dat['mappings'] = mappings_dat
+                mappings_dat[k] = v
+            config_dat['mappings'] = mappings_dat
     except AssertionError as err:
         print("ERROR : config not valid\nERROR {err}\nERROR Check the doc for formating advice".format(err = err), file = sys.stderr)
         return None
