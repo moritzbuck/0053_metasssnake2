@@ -145,7 +145,7 @@ binsets_fields =  {
     },
     'keep_fails' : {
         'type' : bool,
-        'default' : True
+        'default' : False
     },
     'external_bins' :
     {
