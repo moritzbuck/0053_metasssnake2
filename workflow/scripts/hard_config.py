@@ -103,7 +103,7 @@ binnings_fields =  {
     'min_bin_size' : {
     'type' : int,
     'default' : 500000,
-    'min' : 0,
+    'min' : -1,
     },
     'other_parameters' : {
     'type' : str,

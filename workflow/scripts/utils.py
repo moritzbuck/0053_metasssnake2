@@ -31,7 +31,7 @@ def dict2file(dd, file):
     cols = list(list(dd.values())[0].keys())
     with open(file, "w") as handle:
         handle.writelines([",".join([""] + cols) + "\n"] )
-        handle.writelines([ k + "," + ",".join([str(v[kk]) for kk in cols]) + "\n"  for k,v in dd.items()])
+        handle.writelines([ k + "," + ",".join([str(v.get(kk, "NA")) for kk in cols]) + "\n"  for k,v in dd.items()])
 
 def is_type(s, typ):
     try:

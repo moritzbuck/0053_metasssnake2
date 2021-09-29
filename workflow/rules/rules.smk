@@ -138,14 +138,42 @@ rule mapping:
 rule gtdbtk:
     input : "{root}/binsets/{binset}/{binset}.fna"
     output :
-        gtdbtk_out = "{root}/mappings/{binset}/gtdbtk"
+        gtdbtk_out = directory("{root}/binsets/{binset}/gtdbtk")
     log :
         log = "{root}/binsets/{binset}/logs/gtdbtk.log",
         env = "{root}/binsets/{binset}/logs/gtdbtk.yaml",
         settings = "{root}/binsets/{binset}/logs/gtdbtk_settings.json"
     threads : 24
-    params : script = "workflow/scripts/binset2gtdbtk.py", config_file = config['config_file']
+    params : script = "workflow/scripts/binset2gtdbtk.py", config_file = config['config_file'], gtdb_db_folder = config['gtdb_db_folder']
     conda : "../envs/gtdbtk.yaml"
     shell : """
-        python {params.script} None {params.config_file} {wildcards.root} {wildcards.root}/binsets/{wildcards.binset}/ {threads}
+        export GTDBTK_DATA_PATH={params.gtdb_db_folder}
+        python {params.script} {wildcards.binset} {params.config_file} {wildcards.root} {wildcards.root}/binsets/{wildcards.binset}/ {threads}
+        """
+
+rule gene_clustering:
+    input : "{root}/binsets/{binset}/{binset}.fna"
+    output :
+        pangenomes_out = "{root}/binsets/{binset}/pangenomes.tsv",
+        bin2gc_out = "{root}/binsets/{binset}/gene_clusters/bin2gc.json"
+    log :
+        log = "{root}/binsets/{binset}/logs/gene_clusters.log",
+        env = "{root}/binsets/{binset}/logs/gene_clusters.yaml",
+        settings = "{root}/binsets/{binset}/logs/gene_clusters_settings.json"
+    threads : 24
+    params : script = "workflow/scripts/gene_clusters_and_pangenomes.py", config_file = config['config_file']
+    conda : "../envs/gtdbtk.yaml"
+    shell : """
+        export PYTHONPATH=`pwd`
+        if [ ! -f $CONDA_PREFIX/bin/anvi-setup-scg-taxonomy ]
+        then
+            ori=`pwd`
+            cd $CONDA_PREFIX/opt/
+            git clone git@github.com:merenlab/anvio.git
+            cd anvio
+            python setup.py install
+            cd $ori
+        fi
+
+        python {params.script} {wildcards.binset} {params.config_file} {wildcards.root} {wildcards.root}/binsets/{wildcards.binset}/ {threads}
         """

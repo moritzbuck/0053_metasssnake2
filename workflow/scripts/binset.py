@@ -32,7 +32,7 @@ min_size = config_file['binsets'][binset_name]['min_size']
 min_coding = config_file['binsets'][binset_name]['min_coding']
 keep_fails = config_file['binsets'][binset_name]['keep_fails']
 
-temp_folder = pjoin(config_file['temp_folder'], "binset", binset_name)
+temp_folder = pjoin(config_file['temp_folder'], "binsets", binset_name)
 freetxt_line("Creating temp folder: " + temp_folder, logfile)
 
 os.makedirs(temp_folder, exist_ok=True)
@@ -52,7 +52,6 @@ formating_dat = {
 'binset_name' : binset_name,
 'logfile' : logfile
 }
-print(config_file['binsets'][binset_name])
 if binnings != [] or external_bins != "":
     title2log("copying bins to temp_folder", logfile)
     os.makedirs(pjoin(temp_folder, "bins") , exist_ok = True)
@@ -244,16 +243,21 @@ if binnings != [] or external_bins != "":
 if binsets :
     title2log(f"copying binsets to merge", logfile)
     freetxt_line(f"remember, merged binsets are not filtered again", logfile)
-    print(binsets)
+#    print(binsets)
 
     for binset in binsets:
+        title2log(f"copying binset {binset}", logfile)
         call(f"cp -r {root_folder}/binsets/{binset}/bins/* {temp_folder}/clean_bins", shell = True)
         stats.update(csv2dict(pjoin(root_folder, "binsets", binset, binset + "_basics.csv")))
+
+    title2log(f"regenerate checkm file", logfile)
 
     with open(f"{temp_folder}/checkm.txt", "w") as handle :
         handle.writelines(["Bin Id\tCompleteness\tContamination\n"] + [ f"{k}\t{v['percent_completion']}\t{v['percent_redundancy']}\n" for k,v in stats.items()])
 
-call("mOTUlize.py -o {temp_folder}/motulize.tsv  --checkm {temp_folder}/checkm.txt --fnas {temp_folder}/clean_bins/*/*.fna --threads {threads} --prefix {binset_name}_mOTU_ --keep-simi-file {temp_folder}/anis.tsv --force".format(**formating_dat), shell = True)
+title2log(f"Running mOTUlizer", logfile)
+
+call("mOTUlize.py -o {temp_folder}/motulize.tsv   --MC -4 --Mc 10000 --SC -4 --checkm {temp_folder}/checkm.txt --fnas {temp_folder}/clean_bins/*/*.fna --threads {threads} --prefix {binset_name}_mOTU_ --keep-simi-file {temp_folder}/anis.tsv ".format(**formating_dat), shell = True)
 
 motupan_dat = csv2dict(pjoin(temp_folder,"motulize.tsv"), sep="\t")
 
@@ -266,6 +270,7 @@ for k,v in motupan_dat.items():
         if vv != "":
             stats[vv]['mOTU'] = k
             stats[vv]['representative'] = v['representative']
+
 
 
 

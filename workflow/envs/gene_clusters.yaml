@@ -1,0 +1,68 @@
+name: gene_clusters
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python ==3.6*
+  - tqdm
+  - biopython
+  - pandas==0.25.1
+  - gffutils
+  - numpy
+  - bottle
+  - pysam
+  - ete3
+  - scipy
+  - scikit-learn >=0.23.2
+  - django
+  - requests
+  - psutil ==5.4.3
+  - mistune
+  - six
+  - matplotlib-base
+  - statsmodels
+  - colored
+  - illumina-utils
+  - tabulate
+  - numba
+  - sqlite >=3.31.1
+  - paste
+  - vmatch
+  - pyani ==0.2.10
+  - snakemake-minimal ==5.10.0
+  - prodigal
+  - mcl
+  - muscle
+  - hmmer
+  - diamond
+  - blast==2.7.1
+  - megahit
+  - spades
+  - bowtie2
+  - bwa
+  - samtools
+  - centrifuge
+  - iqtree
+  - trimal
+  - fastani
+  - trnascan-se
+  - r-base
+  - r-stringi
+  - r-tidyverse
+  - r-magrittr
+  - r-optparse
+  - bioconductor-qvalue
+  - fasttree
+  - vmatch
+  - snakemake==5.10.0
+  - tabulate==0.8.9
+  - Django==3.2.6
+  - ete3==3.1.2
+  - numpy==1.19.5
+  - nbformat==5.1.3
+  - jsonschema==3.2.0
+  - charset-normalizer==2.0.0
+  - sqlparse==0.4.1
+  - jupyter_core==4.7.1
+  - motulizer==0.3.1
