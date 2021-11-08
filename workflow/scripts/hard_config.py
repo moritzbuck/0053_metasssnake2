@@ -54,6 +54,10 @@ libraries_fields = {
     'type' : str,
     'default' : "~/dbs/sortmerna/set5-database.fasta;~/dbs/sortmerna/set6-database.fasta"
     },
+    'rna' : {
+    'type' : bool,
+    'default' : False
+    },
     'other_parameters' : {
     'type' : str,
     'default' : {}
@@ -84,7 +88,7 @@ assemblies_fields =  {
     },
     'keep_unpaired' : {
     'type' : bool,
-    'default' : {}
+    'default' : False
     }
 }
 

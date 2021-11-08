@@ -19,6 +19,8 @@ call("conda env export > {out_folder}/logs/library_processing.yaml".format(out_f
 with open("{out_folder}/logs/library_processing_settings.json".format(out_folder = out_folder), "w") as handle:
     json.dump(config_file, handle, indent = 2, sort_keys = True)
 
+rna = config_file['libraries'][lib_name]["rna"]
+refs = " ".join(["--ref " + f for f in config_file['libraries'][lib_name]["sortmerna_refs"].split(";")])
 
 title2log("Starting processing library {}".format(lib_name), logfile)
 
@@ -96,7 +98,8 @@ for unp in config_file['libraries'][lib_name]["unp"]:
 with open(pjoin(out_folder, "stats/fastp_{lib_name}.stats".format(lib_name = lib_name)), "w") as handle:
    json.dump(qc_log, handle, indent = 2, sort_keys = True)
 
-title2log("Read subsetting", logfile)
+
+
 
 
 if not os.path.exists(pjoin(temp_folder, "fwd.fastq")):
@@ -107,6 +110,31 @@ else :
     paired_size = os.path.getsize(pjoin(temp_folder, "fwd.fastq"))+os.path.getsize(pjoin(temp_folder, "rev.fastq"))
 
 unpaired_size = os.path.getsize(pjoin(temp_folder, "unp.fastq"))
+
+if rna == True:
+
+    if not only_singles:
+        title2log("running sortmeRNA on pairs", logfile)
+
+        call(f"""
+        sortmerna --task 4 --out2 --threads {threads} {refs}  --reads {temp_folder}/fwd.fastq --reads {temp_folder}/rev.fastq --workdir {temp_folder}/smrna_paired/  -num_alignments 1 -v --fastx  --aligned --other > {logfile} 2>&1
+        """, shell=True)
+        shutil.move(pjoin(temp_folder, "smrna_paired", "out", "aligned_fwd.fq") , pjoin(temp_folder, "rrna_fwd.fastq") )
+        shutil.move(pjoin(temp_folder, "smrna_paired","out","aligned_rev.fq") , pjoin(temp_folder, "rrna_rev.fastq") )
+        shutil.move(pjoin(temp_folder, "smrna_paired","out","other_fwd.fq") , pjoin(temp_folder, "mrna_fwd.fastq") )
+        shutil.move(pjoin(temp_folder, "smrna_paired","out","other_rev.fq") , pjoin(temp_folder, "mrna_rev.fastq") )
+        shutil.move(pjoin(temp_folder, "smrna_paired","out","aligned.log") , pjoin(out_folder, "stats", "sortmerna_" + lib_name + "_paired.stats") )
+
+    call(f"""
+    sortmerna --task 4  --threads {threads} {refs}  --reads {temp_folder}/unp.fastq --workdir {temp_folder}/smrna_unpaired/  -num_alignments 1 -v --fastx --threads {threads} --aligned  --other >> {logfile} 2>&1
+    """, shell=True)
+    shutil.move(pjoin(temp_folder, "smrna_unpaired","out","aligned.fq") , pjoin(temp_folder, "rrna_unp.fastq") )
+    shutil.move(pjoin(temp_folder, "smrna_unpaired","out","other.fq") , pjoin(temp_folder, "mrna_unp.fastq") )
+    shutil.move(pjoin(temp_folder, "smrna_unpaired","out","aligned.log") , pjoin(out_folder, "stats", "sortmerna_" + lib_name + "_unpaired.stats") )
+
+    title2log("Cleaning up and moving".format(lib_name = lib_name), logfile)
+
+title2log("Read subsetting", logfile)
 
 read_proc_line = """
 reformat.sh {in_reads} {out_reads} samplereadstarget={subcount} sampleseed=42 t={threads}  2>> {log}
@@ -133,8 +161,7 @@ else :
 title2log("Read sketching", logfile)
 
 sourmash_line = """
-sourmash compute --track-abundance --merge {lname} -k{k} --scaled {scale} {temp}/fwd.fastq {temp}/rev.fastq {temp}/unp.fastq -o {temp}/{lname}.sig -p {threads}  2>> {log}
-echo FIx sourmash line to sketch instead of compute
+sourmash sketch dna -p k={k},abund,scaled={scale}  --merge {lname} {temp}/fwd.fastq {temp}/rev.fastq {temp}/unp.fastq -o {temp}/{lname}.sig   2>> {log}
 """
 
 call(sourmash_line.format(k = config_file['libraries'][lib_name]['sourmash_k'], scale = config_file['libraries'][lib_name]['sourmash_scaled'], lname = lib_name, temp = temp_folder, threads = threads, log = pjoin(out_folder,  "logs/sourmash_compute.log")), shell=True)
@@ -151,6 +178,16 @@ to_gz = ['{temp}/fwd.fastq',
          '{temp}/subs/subs_{lname}_fwd.fastq',
          '{temp}/subs/subs_{lname}_rev.fastq',
          ]
+
+if rna:
+    to_gz += ['{temp}/rrna_fwd.fastq',
+    '{temp}/mrna_fwd.fastq',
+    '{temp}/rrna_rev.fastq',
+    '{temp}/mrna_rev.fastq',
+    '{temp}/rrna_unp.fastq',
+    '{temp}/mrna_unp.fastq',
+    ]
+
 to_gz = [g.format(temp = temp_folder, lname = lib_name) for g in to_gz]
 
 for f in to_gz:
@@ -160,6 +197,15 @@ to_rename = ['fwd.fastq.gz',
          'rev.fastq.gz',
          'unp.fastq.gz']
 
+if rna:
+    to_rename += ['rrna_fwd.fastq.gz',
+    'mrna_fwd.fastq.gz',
+    'rrna_rev.fastq.gz',
+    'mrna_rev.fastq.gz',
+    'rrna_unp.fastq.gz',
+    'mrna_unp.fastq.gz',
+    ]
+
 for f in to_rename:
     shutil.move(pjoin(temp_folder, f), pjoin(temp_folder, lib_name + "_" + f))
 
@@ -168,6 +214,16 @@ to_move = ['{temp}/{lname}_fwd.fastq.gz',
          '{temp}/{lname}_unp.fastq.gz',
          '{temp}/{lname}.sig.gz'
          ]
+
+if rna:
+    to_move += ['{temp}/{lname}_rrna_fwd.fastq.gz',
+    '{temp}/{lname}_mrna_fwd.fastq.gz',
+    '{temp}/{lname}_rrna_rev.fastq.gz',
+    '{temp}/{lname}_mrna_rev.fastq.gz',
+    '{temp}/{lname}_rrna_unp.fastq.gz',
+    '{temp}/{lname}_mrna_unp.fastq.gz',
+    ]
+
 
 to_move = [g.format(temp = temp_folder, lname = lib_name) for g in to_move]
 
