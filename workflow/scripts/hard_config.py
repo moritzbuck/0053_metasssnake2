@@ -184,6 +184,10 @@ mappings_fields =  {
         'type' : bool,
         'default' : False
     },
+    'is_rna' : {
+        'type' : bool,
+        'default' : False
+    },
     'taxfield' : {
     'type' : str,
     'default' : 'scg_taxo'
@@ -191,6 +195,10 @@ mappings_fields =  {
     'other_parameters' : {
     'type' : str,
     'default' : {}
+    },
+    'alternate_root': {
+    'type' : str,
+    'default' : ""
     },
     'min_nucleotide_id' : {
         'type' : float,

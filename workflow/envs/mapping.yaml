@@ -1,4 +1,4 @@
-name: binning
+name: mapping
 channels:
   - conda-forge
   - bioconda

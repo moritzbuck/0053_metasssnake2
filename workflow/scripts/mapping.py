@@ -21,12 +21,17 @@ with open("{out_folder}/logs/mapping_settings.json".format(out_folder = out_fold
 
 
 subset = config_file['mappings'][mapping_name]['subset']
+is_rna = config_file['mappings'][mapping_name]['is_rna']
 method = config_file['mappings'][mapping_name]['mapper']
 binset = config_file['mappings'][mapping_name]['binset']
 taxfield = config_file['mappings'][mapping_name]['taxfield']
-
+alternate_root = config_file['mappings'][mapping_name]['alternate_root']
 ani = config_file['mappings'][mapping_name]['min_nucleotide_id']
 threads = int(threads)
+mrna_flag = "_mrna" if is_rna else ""
+
+if not alternate_root :
+    alternate_root = binset
 
 temp_folder = pjoin(config_file['temp_folder'], "mappings", mapping_name)
 freetxt_line("Creating temp folder: " + temp_folder, logfile)
@@ -35,7 +40,7 @@ os.makedirs(temp_folder, exist_ok=True)
 
 title2log("copying binset to temp_folder", logfile)
 
-shutil.copy(pjoin(root_folder, "binsets", binset, binset + ".fna"), pjoin(temp_folder, "binset.fna"))
+shutil.copy(pjoin(root_folder, "binsets", binset, alternate_root + ".fna"), pjoin(temp_folder, "binset.fna"))
 
 title2log("indexing binset to temp_folder", logfile)
 
@@ -45,11 +50,11 @@ freetxt_line("Starting mappings", logfile)
 coverages = {}
 total_reads = {}
 for lib in config_file['mappings'][mapping_name]['libraries']:
-    title2log("copying {subset}{lib} to temp_folder".format(lib = lib, subset = "subset_" if subset else ""), logfile)
+    title2log("copying {subset}{lib}{mrna_flag} to temp_folder".format(lib = lib, subset = "subset_" if subset else "", mrna_flag = mrna_flag), logfile)
     call("""
-    unpigz -kc {root_folder}/libraries/{lname}{subset_str}{lname}_fwd.fastq.gz > {temp}/fwd.fastq 2>> {out_folder}/logs/mapping.log
-    unpigz -kc {root_folder}/libraries/{lname}{subset_str}{lname}_rev.fastq.gz > {temp}/rev.fastq 2>> {out_folder}/logs/mapping.log
-    unpigz -kc {root_folder}/libraries/{lname}{subset_str}{lname}_unp.fastq.gz > {temp}/unp.fastq 2>> {out_folder}/logs/mapping.log
+    unpigz -kc {root_folder}/libraries/{lname}{subset_str}{lname}{mrna_flag}_fwd.fastq.gz > {temp}/fwd.fastq 2>> {out_folder}/logs/mapping.log
+    unpigz -kc {root_folder}/libraries/{lname}{subset_str}{lname}{mrna_flag}_rev.fastq.gz > {temp}/rev.fastq 2>> {out_folder}/logs/mapping.log
+    unpigz -kc {root_folder}/libraries/{lname}{subset_str}{lname}{mrna_flag}_unp.fastq.gz > {temp}/unp.fastq 2>> {out_folder}/logs/mapping.log
     """.format(root_folder = root_folder, lname = lib, temp=temp_folder, out_folder = out_folder, subset_str = "/subs/subs_" if subset else "/"), shell=True)
     title2log("mapping {lib} to ref".format(lib = lib), logfile)
     call("""
