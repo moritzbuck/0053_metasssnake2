@@ -10,3 +10,6 @@ dependencies:
   - tqdm
   - coverm
   - pandas
+  - minimap2
+  - bowtie2
+  - bbmap

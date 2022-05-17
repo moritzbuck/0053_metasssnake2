@@ -9,6 +9,7 @@ from subprocess import call
 import json
 from collections import OrderedDict
 import anvio
+import pandas
 
 script , binset_name, config_file, root_folder, out_folder, threads = sys.argv
 
@@ -20,8 +21,8 @@ with open("{out_folder}/logs/gene_clusters_settings.json".format(out_folder = ou
     json.dump(config_file, handle, indent = 2, sort_keys = True)
 
 threads = int(threads)
-seqid = 0.8
-covmode = 0
+seqid = 0.7
+covmode = 1
 cov = 0.8
 boots = 10
 min_genomes = 10
@@ -66,8 +67,8 @@ gene_clusters2rep = {v: k for k,v in rep2clust.items()}
 
 freetxt_line(" ".join(["For", str(len(recs)), "CDSes we got ", str(len(gene_clusters2rep)), " gene-clusters"]), logfile)
 
-recs = {k : rep2clust[v] for k, v in recs.items()}
 clst2gene = { clst : [] for clst in gene_clusters2rep}
+recs = {k : rep2clust[v] for k, v in recs.items()}
 for gene, clst in recs.items():
     clst2gene[clst].append(gene)
 
@@ -77,26 +78,26 @@ for gc, cdss in clst2gene.items():
         bin_ = "_".join(cds.split("_")[:-1])
         bin2gc[bin_] += [gc]
 
-    title2log("Editing the gff-files and dumping data", logfile)
-    for bin_ in tqdm([f for f in os.listdir(pjoin(temp_folder, "bins")) if f.endswith(".gff")]):
-        with open(pjoin(temp_folder,"bins", bin_)) as handle:
-            lines = handle.readlines()
-        for i in range(len(lines)):
-            ll = lines[i].strip()
-            if ll=="##FASTA":
-                break
-            if ll[0] != "#" and "CDS" in ll:
-                ll = ll.split("\t")
-                tail = ll[-1]
-                tail = OrderedDict([tuple(kv.split("=")) for kv in tail.strip().split(";")])
-                tail['gene_cluster']  =  recs[tail['ID']]
-                tail = ";".join([k + "=" + v for k,v in tail.items()])
-                ll[-1] = tail
-                ll = "\t".join(ll)+ "\n"
-                lines[i] = ll
-        with open(pjoin(temp_folder,"bins", bin_), "w") as handle:
-            handle.writelines(lines)
-        call("sed '/##FASTA/q' {file} | grep -v '^# ' >> {ass}".format(file = pjoin(temp_folder,"bins", bin_), ass = pjoin(temp_folder,  binset_name + ".gff")), shell=True)
+title2log("Editing the gff-files and dumping data", logfile)
+for bin_ in tqdm([f for f in os.listdir(pjoin(temp_folder, "bins")) if f.endswith(".gff")]):
+    with open(pjoin(temp_folder,"bins", bin_)) as handle:
+        lines = handle.readlines()
+    for i in range(len(lines)):
+        ll = lines[i].strip()
+        if ll=="##FASTA":
+            break
+        if ll[0] != "#" and "CDS" in ll:
+            ll = ll.split("\t")
+            tail = ll[-1]
+            tail = OrderedDict([tuple(kv.split("=")) for kv in tail.strip().split(";")])
+            tail['gene_cluster']  =  recs[tail['ID']]
+            tail = ";".join([k + "=" + v for k,v in tail.items()])
+            ll[-1] = tail
+            ll = "\t".join(ll)+ "\n"
+            lines[i] = ll
+    with open(pjoin(temp_folder,"bins", bin_), "w") as handle:
+        handle.writelines(lines)
+    call("sed '/##FASTA/q' {file} | grep -v '^# ' >> {ass}".format(file = pjoin(temp_folder,"bins", bin_), ass = pjoin(temp_folder,  binset_name + ".gff")), shell=True)
 
 
 with open(pjoin(gc_folder, "gene_cluster2representative_cds.json") , "w") as handle:
@@ -104,6 +105,10 @@ with open(pjoin(gc_folder, "gene_cluster2representative_cds.json") , "w") as han
 
 with open(pjoin(gc_folder, "bin2gene_clusters.json") , "w") as handle:
     json.dump(bin2gc, handle, indent = 2, sort_keys = True)
+
+with open(pjoin(gc_folder, "gene2gene_clusters.json") , "w") as handle:
+    json.dump(recs, handle, indent = 2, sort_keys = True)
+
 
 with open(f"{temp_folder}/checkm.txt", "w") as handle :
     handle.writelines(["Bin Id\tCompleteness\tContamination\n"] + [ f"{k}\t{v['percent_completion']}\t{v['percent_redundancy']}\n" for k,v in binset_stats.items()])
@@ -178,11 +183,12 @@ title2log(f"Running KEGG module estimation for all genoems", logfile)
 bin2ko = {}
 for bin_ in tqdm([f for f in os.listdir(pjoin(temp_folder, "bins")) if f.endswith(".db")]):
     out = bin_.replace(".db", ".kofam")
-    call(f"anvi-export-functions -c {temp_folder}/bins/{bin_} --annotation-sources KOfam -o {temp_folder}/bins/{out} --quiet", shell = True)
-    with open(f"{temp_folder}/bins/{out}") as handle:
-        kos = set([l.split()[2] for l in handle.readlines()])
-        bin2ko[bin_.replace(".db", "")] = kos
-#call(f"anvi-estimate-metabolism -e{temp_folder}/bin_list.tsv --output-file-prefix {temp_folder}/KEGG-metabolism --matrix-format --quiet", shell = True)
+    if bin_.replace(".db", "") not in bin2ko:
+        call(f"anvi-export-functions -c {temp_folder}/bins/{bin_} --annotation-sources KOfam -o {temp_folder}/bins/{out} --quiet", shell = True)
+        with open(f"{temp_folder}/bins/{out}") as handle:
+            kos = set([l.split()[2] for l in handle.readlines()])
+            bin2ko[bin_.replace(".db", "")] = kos
+call(f"anvi-estimate-metabolism -e{temp_folder}/bin_list.tsv --output-file-prefix {temp_folder}/KEGG-metabolism --matrix-format --quiet", shell = True)
 
 
 
@@ -198,6 +204,8 @@ bin2module = {bin_ : []for bin_ in binset_stats}
 for module, bins_ in module2bin.items():
     for bin_ in bins_:
         bin2module[bin_].append(module)
+
+os.makedirs(kegg_folder, exist_ok = True)
 
 with open(pjoin(kegg_folder, "bin2module.json") , "w") as handle:
     json.dump(bin2module, handle, indent = 2, sort_keys = True)

@@ -128,7 +128,7 @@ binsets_fields =  {
     'min_completeness' : {
         'type' : float,
         'default' : 30,
-        'min' : 0,
+        'min' : -1.1,
         'max' : 100
     },
     'max_contamination' : {
@@ -139,7 +139,7 @@ binsets_fields =  {
     'min_coding' : {
         'type' : float,
         'default' : 0.2,
-        'min' : 0,
+        'min' : -1.1,
         'max' : 1
     },
     'min_size' : {
@@ -177,14 +177,22 @@ mappings_fields =  {
         'type' : str
     },
     'mapper' : {
-        'possibles' : ['bwa-mem2'],
+        'possibles' : ['bwa-mem2', "bowtie2", "minimap2"],
         'default' : 'bwa-mem2'
     },
     'subset' : {
         'type' : bool,
         'default' : False
     },
+    'precluster' : {
+        'type' : bool,
+        'default' : False
+    },
     'is_rna' : {
+        'type' : bool,
+        'default' : False
+    },
+    'keep_mapped' : {
         'type' : bool,
         'default' : False
     },
@@ -205,6 +213,11 @@ mappings_fields =  {
         'default' : 50,
         'min' : 0
     },
+    'min_len' : {
+        'type' : int,
+        'default' : 100,
+        'min' : 0
+    }
 }
 
 necessary_gene_clusters_fields = ['binset']

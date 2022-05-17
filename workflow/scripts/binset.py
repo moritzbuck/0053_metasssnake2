@@ -60,7 +60,8 @@ if binnings != [] or external_bins != "":
         call("cp {binni}/* {temp}/bins/".format(binni = binni, temp = temp_folder), shell = True)
     if external_bins:
         title2log("copying bins from the external_bins folder "+ external_bins , logfile)
-        call(f"cp {external_bins}/*.fna {temp_folder}/bins/", shell = True)
+        for b in os.listdir(external_bins):
+            shutil.copy(f"{external_bins}/{b}", f"{temp_folder}/bins/")
 
     title2log("Handle unbinned", logfile)
 
@@ -87,12 +88,12 @@ if binnings != [] or external_bins != "":
     header_lines = header_lines[0]
     header_line = all_lines[header_lines]
     lines = [l for i,l in enumerate(all_lines) if i != header_lines and len(l) == len(header_line)]
-    lines = [{a : b if a in ['Marker lineage', 'Bin Id'] else float(b) for a,b in zip(header_line,l) }for l in lines]
+    lines = [{a : b if a in ['Marker lineage', 'Bin Id'] else float(b) for a,b in zip(header_line,l) } for l in lines if not l[0] == 'Bin Id']
 
     nb_bins = len(lines)
     freetxt_line(f"{nb_bins} bins collected", logfile)
 
-    checkm_out = {l['Bin Id'] : {k: l[k] for k in ('Completeness', 'Contamination', 'Strain heterogeneity')} for l in lines if l['Completeness'] > min_completeness and l['Contamination'] < max_contamination}
+    checkm_out = {l['Bin Id'] : {k: l[k] for k in ('Completeness', 'Contamination', 'Strain heterogeneity')} for l in lines if l['Completeness'] > min_completeness and l['Contamination'] < max_contamination }
 
 
     removed = 0
@@ -111,7 +112,7 @@ if binnings != [] or external_bins != "":
 
     for f in os.listdir(tbinfoder):
         fna = list(SeqIO.parse(pjoin(tbinfoder, f), "fasta"))
-        faa = list(SeqIO.parse(pjoin(temp_folder, "checkm/bins/", f[:-4], "genes.faa"), "fasta"))
+         faa = list(SeqIO.parse(pjoin(temp_folder, "checkm/bins/", f[:-4], "genes.faa"), "fasta"))
         checkm_out[f[:-4]]['length'] = sum([len(s) for s in fna])
         checkm_out[f[:-4]]['acoding_density'] = 3*sum([len(s) for s in faa])/checkm_out[f[:-4]]['length']
 
@@ -151,7 +152,7 @@ if binnings != [] or external_bins != "":
                     buffer = []
             SeqIO.write(buffer, handle, "fasta")
         shutil.move(pjoin(temp_folder, "clean_bins", binset_name + "_unkept2.fna"),pjoin(temp_folder, "clean_bins", binset_name + "_unkept.fna"))
-        call("prokka --outdir {temp}/clean_bins/{binset}_unkept --prefix {binset}_unkept --locustag {binset}_unkept --metagenome --cpus {threads} {temp}/clean_bins/{binset}_unkept.fna >> {logfile}  2>&1".format(threads= threads, binset = binset_name, temp=temp_folder, logfile = logfile), shell=True)
+#        call("prokka --outdir {temp}/clean_bins/{binset}_unkept --prefix {binset}_unkept --locustag {binset}_unkept --metagenome --cpus {threads} {temp}/clean_bins/{binset}_unkept.fna >> {logfile}  2>&1".format(threads= threads, binset = binset_name, temp=temp_folder, logfile = logfile), shell=True)
         os.remove(pjoin(cbinfoder, binset_name + "_unkept.fna"))
 
     call("ls {temp}/bins/ | rev | cut -f2- -d. | rev | parallel -j{threads} prokka --outdir {temp}/clean_bins/{{}} --prefix {{}} --locustag {{}} --cpus 1 {temp}/bins/{{}}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder), shell = True)
@@ -171,11 +172,17 @@ if binnings != [] or external_bins != "":
     ls {temp_folder}/clean_bins/  | parallel -j{threads} anvi-import-functions --quiet -c {temp_folder}/clean_bins/{{}}/{{}}.db -i {temp_folder}/clean_bins/{{}}/{{}}.annot"""
 
     for bin_id in tqdm(os.listdir(pjoin(temp_folder, "clean_bins"))):
+        if os.stat(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".faa")).st_size != 0:
             prokka_out = gff2anvio(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".gff"))
             with open(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".annot"), "w") as handle:
                 handle.writelines(prokka_out['annot'])
             with open(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".cdss"), "w") as handle:
                 handle.writelines(prokka_out['cdss'])
+        else :
+            with open(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".annot"), "w") as handle:
+                handle.writelines([])
+            with open(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".cdss"), "w") as handle:
+                handle.writelines([])
 
     call(make_dbs_line.format(**formating_dat), shell = True)
     title2log("done with anvi'o databases", logfile)
@@ -206,7 +213,9 @@ if binnings != [] or external_bins != "":
     get_taxo_line = "anvi-estimate-scg-taxonomy --quiet -T {threads} -c {temp_folder}/clean_bins/{bin_id}/{bin_id}.db -o {tempfile}"
     head = ["d__", "p__", "c__", "o__", "f__", "g__", "s__"]
     for bin_id in tqdm(os.listdir(pjoin(temp_folder, "clean_bins"))):
-        if os.path.isdir(pjoin(temp_folder, "clean_bins", bin_id)):
+        if not os.path.exists(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".db")):
+            call(f"anvi-gen-contigs-database --ignore-internal-stop-codons --quiet -n {binset_name} -f {temp_folder}/clean_bins/{bin_id}/{bin_id}.fna -o {temp_folder}/clean_bins/{bin_id/{bin_id}.db -T {threads} --skip-gene-calling")
+        if os.path.isdir(pjoin(temp_folder, "clean_bins", bin_id)) and bin_id not in stats:
             tt = ContigSummarizer(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".db")).get_contigs_db_info_dict(gene_caller_to_use="Prodigal")
             t_file = NamedTemporaryFile()
             formating_dat['bin_id'] = bin_id
@@ -247,32 +256,55 @@ if binsets :
 
     for binset in binsets:
         title2log(f"copying binset {binset}", logfile)
-        call(f"cp -r {root_folder}/binsets/{binset}/bins/* {temp_folder}/clean_bins", shell = True)
+        call(f"cp -a {root_folder}/binsets/{binset}/bins/. {temp_folder}/clean_bins", shell = True)
         stats.update(csv2dict(pjoin(root_folder, "binsets", binset, binset + "_basics.csv")))
 
     title2log(f"regenerate checkm file", logfile)
 
     with open(f"{temp_folder}/checkm.txt", "w") as handle :
+        v['percent_completion'] = 0.0 if v['percent_completion'] is None else v['percent_completion']
+        v['percent_redundancy'] = 0.0 if v['percent_redundancy'] is None else v['percent_redundancy']
         handle.writelines(["Bin Id\tCompleteness\tContamination\n"] + [ f"{k}\t{v['percent_completion']}\t{v['percent_redundancy']}\n" for k,v in stats.items()])
 
 title2log(f"Running mOTUlizer", logfile)
 
-call("mOTUlize.py -o {temp_folder}/motulize.tsv   --MC -4 --Mc 10000 --SC -4 --checkm {temp_folder}/checkm.txt --fnas {temp_folder}/clean_bins/*/*.fna --threads {threads} --prefix {binset_name}_mOTU_ --keep-simi-file {temp_folder}/anis.tsv ".format(**formating_dat), shell = True)
+call("""
+find {temp_folder}/clean_bins/ -name "*.fna"  > {temp_folder}/file_list
+mOTUlize.py -o {temp_folder}/motulize.tsv   --MC -4 --Mc 10000 --SC -4 --checkm {temp_folder}/checkm.txt --txt --fnas {temp_folder}/file_list --threads {threads} --prefix {binset_name}_mOTU_ --keep-simi-file {temp_folder}/anis.tsv
+""".format(**formating_dat), shell = True)
 
-motupan_dat = csv2dict(pjoin(temp_folder,"motulize.tsv"), sep="\t")
-
-shutil.move(pjoin(temp_folder, "motulize.tsv"), out_folder)
-shutil.move(pjoin(temp_folder, "anis.tsv"), out_folder)
-
-for k,v in motupan_dat.items():
-    bins = v.get('MAGs', "").split(";") + v.get('SUBs', "").split(";")
-    for vv in bins:
-        if vv != "":
-            stats[vv]['mOTU'] = k
-            stats[vv]['representative'] = v['representative']
+call("""
+find {temp_folder}/clean_bins/ -name "*.fna"  > {temp_folder}/file_list
+mOTUlize.py -o {temp_folder}/motulize.tsv   --MC 40 --Mc 3 --SC -4 --checkm {temp_folder}/checkm.txt --txt --fnas {temp_folder}/file_list --threads {threads} --prefix {binset_name}_mOTU_ --similarities {temp_folder}/anis.tsv
+""".format(**formating_dat), shell = True)
 
 
+if os.path.exists(pjoin(temp_folder,"motulize.tsv")):
+    motupan_dat = csv2dict(pjoin(temp_folder,"motulize.tsv"), sep="\t")
 
+
+    for k,v in motupan_dat.items():
+        bins = v.get('MAGs', "").split(";") + v.get('SUBs', "").split(";")
+        for vv in bins:
+            if vv != "" and vv in stats:
+                stats[vv]['mOTU'] = k
+                stats[vv]['representative'] = v['representative']
+            elif vv != "" :
+                stats[vv] = dict()
+                tt = ContigSummarizer(pjoin(out_folder, "bins", vv, vv + ".db")).get_contigs_db_info_dict(gene_caller_to_use="Prodigal")
+                est_coding = tt['avg_gene_length']*tt['num_genes']/tt['total_length']
+                tt = {k : v for k,v in tt.items() if k in fields}
+                stats[vv] = tt
+                stats[vv]['mOTU'] = k
+                stats[vv]['representative'] = v['representative']
+
+    shutil.move(pjoin(temp_folder, "motulize.tsv"), out_folder)
+    shutil.move(pjoin(temp_folder, "anis.tsv"), out_folder)
+
+else :
+    for k in stats:
+        stats[k]['mOTU'] = "NoMOTU"
+        stats[k]['representative'] = k
 
 dict2file(stats, pjoin(out_folder, binset_name + "_basics.csv"))
 
@@ -282,8 +314,8 @@ if os.path.exists(pjoin(out_folder, binset_name + ".fna")):
     os.remove(pjoin(out_folder,  binset_name +  ".fna"))
 
 os.makedirs(pjoin(out_folder, "bins") , exist_ok = True)
-for file in os.listdir(cbinfoder):
-    shutil.move(pjoin(cbinfoder,file), pjoin(out_folder, "bins"))
+for file in tqdm(os.listdir(cbinfoder)):
+#    shutil.move(pjoin(cbinfoder,file), pjoin(out_folder, "bins"))
     call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".fna"), ass = pjoin(out_folder,  binset_name + ".fna")), shell=True)
     call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".faa"), ass = pjoin(out_folder,  binset_name + ".faa")), shell=True)
     call("sed '/##FASTA/q' {file} | grep -v '^# ' >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".gff"), ass = pjoin(out_folder,  binset_name + ".gff")), shell=True)
