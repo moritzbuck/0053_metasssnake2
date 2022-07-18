@@ -31,6 +31,7 @@ max_contamination = config_file['binsets'][binset_name]['max_contamination']
 min_size = config_file['binsets'][binset_name]['min_size']
 min_coding = config_file['binsets'][binset_name]['min_coding']
 keep_fails = config_file['binsets'][binset_name]['keep_fails']
+motulize = config_file['binsets'][binset_name]['motulize']
 
 temp_folder = pjoin(config_file['temp_folder'], "binsets", binset_name)
 freetxt_line("Creating temp folder: " + temp_folder, logfile)
@@ -58,24 +59,27 @@ if binnings != [] or external_bins != "":
     for binni in binnings:
         title2log("copying bins from " + binni.split("/")[-2], logfile)
         call("cp {binni}/* {temp}/bins/".format(binni = binni, temp = temp_folder), shell = True)
-    if external_bins:
-        title2log("copying bins from the external_bins folder "+ external_bins , logfile)
-        for b in os.listdir(external_bins):
-            shutil.copy(f"{external_bins}/{b}", f"{temp_folder}/bins/")
 
     title2log("Handle unbinned", logfile)
-
     append2unkept = lambda f : call("cat {folder}/{f} >> {ofolder}/{binset}_unkept.fna".format(f = f, folder = tbinfoder, ofolder = cbinfoder, binset = binset_name), shell=True)
 
     for f in os.listdir(tbinfoder):
         if f.endswith("-unbinned.fna"):
             if keep_fails:
                 append2unkept(f)
-            os.remove(pjoin(tbinfoder, f))
+                os.remove(pjoin(tbinfoder, f))
+
+    if external_bins:
+        title2log("copying bins from the external_bins folder "+ external_bins , logfile)
+        for b in os.listdir(external_bins):
+            shutil.copy(f"{external_bins}/{b}", f"{temp_folder}/bins/")
+
+
+
 
     title2log("Running checkm", logfile)
 
-    call("checkm lineage_wf --pplacer_threads {threads} -x fna -t {threads} {temp}/bins/ {temp}/checkm > {temp}/checkm.txt  2>> {logfile}".format(temp = temp_folder, logfile = logfile, threads = threads), shell = True)
+    call("checkm taxonomy_wf life Prokaryote -x fna -t {threads} {temp}/bins/ {temp}/checkm > {temp}/checkm.txt  2>> {logfile}".format(temp = temp_folder, logfile = logfile, threads = threads), shell = True)
 
     with open(pjoin(temp_folder, "checkm.txt")) as handle:
         all_lines = [l.strip() for l in  handle.readlines() if " INFO:" not in l]
@@ -112,7 +116,7 @@ if binnings != [] or external_bins != "":
 
     for f in os.listdir(tbinfoder):
         fna = list(SeqIO.parse(pjoin(tbinfoder, f), "fasta"))
-         faa = list(SeqIO.parse(pjoin(temp_folder, "checkm/bins/", f[:-4], "genes.faa"), "fasta"))
+        faa = list(SeqIO.parse(pjoin(temp_folder, "checkm/bins/", f[:-4], "genes.faa"), "fasta"))
         checkm_out[f[:-4]]['length'] = sum([len(s) for s in fna])
         checkm_out[f[:-4]]['acoding_density'] = 3*sum([len(s) for s in faa])/checkm_out[f[:-4]]['length']
 
@@ -155,7 +159,7 @@ if binnings != [] or external_bins != "":
 #        call("prokka --outdir {temp}/clean_bins/{binset}_unkept --prefix {binset}_unkept --locustag {binset}_unkept --metagenome --cpus {threads} {temp}/clean_bins/{binset}_unkept.fna >> {logfile}  2>&1".format(threads= threads, binset = binset_name, temp=temp_folder, logfile = logfile), shell=True)
         os.remove(pjoin(cbinfoder, binset_name + "_unkept.fna"))
 
-    call("ls {temp}/bins/ | rev | cut -f2- -d. | rev | parallel -j{threads} prokka --outdir {temp}/clean_bins/{{}} --prefix {{}} --locustag {{}} --cpus 1 {temp}/bins/{{}}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder), shell = True)
+#    call("ls {temp}/bins/ | rev | cut -f2- -d. | rev | parallel -j{threads} prokka --outdir {temp}/clean_bins/{{}} --prefix {{}} --locustag {{}} --metagenome --cpus 1 {temp}/bins/{{}}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder), shell = True)
     to_redo = []
     for bin_ in os.listdir(f"{temp_folder}/clean_bins/"):
         if not os.path.exists(f"{temp_folder}/clean_bins/{bin_}/{bin_}.gff"):
@@ -163,8 +167,8 @@ if binnings != [] or external_bins != "":
 
     title2log(f"have to rerun {len(to_redo)} prokkas for unknown reasons", logfile)
 
-    for f in tqdm(to_redo):
-        call("prokka --force --outdir {temp}/clean_bins/{f} --prefix {f} --locustag {f} --cpus {threads} {temp}/bins/{f}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder, f = f), shell = True)
+#    for f in tqdm(to_redo):
+#        call("prokka --force --outdir {temp}/clean_bins/{f} --prefix {f} --locustag {f} --cpus {threads} {temp}/bins/{f}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder, f = f), shell = True)
 
 
     title2log("Creating anvi'o databases", logfile)
@@ -184,7 +188,7 @@ if binnings != [] or external_bins != "":
             with open(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".cdss"), "w") as handle:
                 handle.writelines([])
 
-    call(make_dbs_line.format(**formating_dat), shell = True)
+#    call(make_dbs_line.format(**formating_dat), shell = True)
     title2log("done with anvi'o databases", logfile)
 
     title2log("pulling anvi'o dataSets for annot if needed", logfile)
@@ -202,7 +206,7 @@ if binnings != [] or external_bins != "":
     for program in anvi_pipe:
         formating_dat['program'] = program
         title2log("running {program} on anvi'o databases".format(**formating_dat), logfile)
-        call(anvi_line.format(**formating_dat), shell = True)
+#        call(anvi_line.format(**formating_dat), shell = True)
 
     class mock:
          def __init__(self):
@@ -214,16 +218,17 @@ if binnings != [] or external_bins != "":
     head = ["d__", "p__", "c__", "o__", "f__", "g__", "s__"]
     for bin_id in tqdm(os.listdir(pjoin(temp_folder, "clean_bins"))):
         if not os.path.exists(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".db")):
-            call(f"anvi-gen-contigs-database --ignore-internal-stop-codons --quiet -n {binset_name} -f {temp_folder}/clean_bins/{bin_id}/{bin_id}.fna -o {temp_folder}/clean_bins/{bin_id/{bin_id}.db -T {threads} --skip-gene-calling")
+            call(f"anvi-gen-contigs-database --ignore-internal-stop-codons --quiet -n {binset_name} -f {temp_folder}/clean_bins/{bin_id}/{bin_id}.fna -o {temp_folder}/clean_bins/{bin_id}/{bin_id}.db -T {threads} --skip-gene-calling", shell = True)
         if os.path.isdir(pjoin(temp_folder, "clean_bins", bin_id)) and bin_id not in stats:
             tt = ContigSummarizer(pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".db")).get_contigs_db_info_dict(gene_caller_to_use="Prodigal")
             t_file = NamedTemporaryFile()
             formating_dat['bin_id'] = bin_id
             formating_dat['tempfile'] = t_file.name
-            call(get_taxo_line.format(**formating_dat), shell = True)
-            with open(t_file.name) as handle:
-                handle.readline().split()
-                scg_taxo = handle.readline().strip().split("\t")
+#            call(get_taxo_line.format(**formating_dat), shell = True)
+#            with open(t_file.name) as handle:
+#                handle.readline().split()
+#                scg_taxo = handle.readline().strip().split("\t")
+            scg_taxo = ('','')
             params.__dict__['contigs_db'] = pjoin(temp_folder, "clean_bins", bin_id, bin_id + ".db")
             c = ContigsSuperclass(params)
             calls = c.get_sequences_for_gene_callers_ids(simple_headers=False)[1]
@@ -268,43 +273,46 @@ if binsets :
 
 title2log(f"Running mOTUlizer", logfile)
 
-call("""
-find {temp_folder}/clean_bins/ -name "*.fna"  > {temp_folder}/file_list
-mOTUlize.py -o {temp_folder}/motulize.tsv   --MC -4 --Mc 10000 --SC -4 --checkm {temp_folder}/checkm.txt --txt --fnas {temp_folder}/file_list --threads {threads} --prefix {binset_name}_mOTU_ --keep-simi-file {temp_folder}/anis.tsv
-""".format(**formating_dat), shell = True)
-
-call("""
-find {temp_folder}/clean_bins/ -name "*.fna"  > {temp_folder}/file_list
-mOTUlize.py -o {temp_folder}/motulize.tsv   --MC 40 --Mc 3 --SC -4 --checkm {temp_folder}/checkm.txt --txt --fnas {temp_folder}/file_list --threads {threads} --prefix {binset_name}_mOTU_ --similarities {temp_folder}/anis.tsv
-""".format(**formating_dat), shell = True)
-
-
-if os.path.exists(pjoin(temp_folder,"motulize.tsv")):
-    motupan_dat = csv2dict(pjoin(temp_folder,"motulize.tsv"), sep="\t")
-
-
-    for k,v in motupan_dat.items():
-        bins = v.get('MAGs', "").split(";") + v.get('SUBs', "").split(";")
-        for vv in bins:
-            if vv != "" and vv in stats:
-                stats[vv]['mOTU'] = k
-                stats[vv]['representative'] = v['representative']
-            elif vv != "" :
-                stats[vv] = dict()
-                tt = ContigSummarizer(pjoin(out_folder, "bins", vv, vv + ".db")).get_contigs_db_info_dict(gene_caller_to_use="Prodigal")
-                est_coding = tt['avg_gene_length']*tt['num_genes']/tt['total_length']
-                tt = {k : v for k,v in tt.items() if k in fields}
-                stats[vv] = tt
-                stats[vv]['mOTU'] = k
-                stats[vv]['representative'] = v['representative']
-
-    shutil.move(pjoin(temp_folder, "motulize.tsv"), out_folder)
-    shutil.move(pjoin(temp_folder, "anis.tsv"), out_folder)
-
+if "motulize" in config_file['binsets'][binset_name]['other_parameters']:
+    params = config_file['binsets'][binset_name]['min_coding']['motulize'].split(":")
+    formating_dat['bin_complete'] = params[0]
+    formating_dat['bin_contamin'] = params[1]
+    formating_dat['sub_complete'] = params[2]
+    formating_dat['sub_contamin'] = params[3]
 else :
-    for k in stats:
-        stats[k]['mOTU'] = "NoMOTU"
-        stats[k]['representative'] = k
+    formating_dat['bin_complete'] = 40
+    formating_dat['bin_contamin'] = 5
+    formating_dat['sub_complete'] = -1
+    formating_dat['sub_contamin'] = 100000
+
+if motulize :
+    call("""
+    find {temp_folder}/clean_bins/ -name "*.fna"  > {temp_folder}/file_list
+    mOTUlize.py -o {temp_folder}/motulize.tsv   --MAG-completeness {bin_complete} --MAG-contamination {bin_contamin} --SUB-completeness {sub_complete} --SUB-contamination {sub_contamin} --checkm {temp_folder}/checkm.txt --txt --fnas {temp_folder}/file_list --threads {threads} --prefix {binset_name}_mOTU_ --keep-simi-file {temp_folder}/anis.tsv
+    """.format(**formating_dat), shell = True)
+
+    if os.path.exists(pjoin(temp_folder,"motulize.tsv")):
+        motupan_dat = csv2dict(pjoin(temp_folder,"motulize.tsv"), sep="\t")
+
+
+        for k,v in motupan_dat.items():
+            bins = v.get('MAGs', "").split(";") + v.get('SUBs', "").split(";")
+            for vv in bins:
+                if vv != "" and vv in stats:
+                    stats[vv]['mOTU'] = k
+                    stats[vv]['representative'] = v['representative']
+                elif vv != "" :
+                    stats[vv] = dict()
+                    tt = ContigSummarizer(pjoin(out_folder, "bins", vv, vv + ".db")).get_contigs_db_info_dict(gene_caller_to_use="Prodigal")
+                    est_coding = tt['avg_gene_length']*tt['num_genes']/tt['total_length']
+                    tt = {k : v for k,v in tt.items() if k in fields}
+                    stats[vv] = tt
+                    stats[vv]['mOTU'] = k
+                    stats[vv]['representative'] = v['representative']
+
+        shutil.move(pjoin(temp_folder, "motulize.tsv"), out_folder)
+        shutil.move(pjoin(temp_folder, "anis.tsv"), out_folder)
+
 
 dict2file(stats, pjoin(out_folder, binset_name + "_basics.csv"))
 
@@ -315,11 +323,11 @@ if os.path.exists(pjoin(out_folder, binset_name + ".fna")):
 
 os.makedirs(pjoin(out_folder, "bins") , exist_ok = True)
 for file in tqdm(os.listdir(cbinfoder)):
-#    shutil.move(pjoin(cbinfoder,file), pjoin(out_folder, "bins"))
+    shutil.move(pjoin(cbinfoder,file), pjoin(out_folder, "bins"))
     call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".fna"), ass = pjoin(out_folder,  binset_name + ".fna")), shell=True)
     call("cat {file} >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".faa"), ass = pjoin(out_folder,  binset_name + ".faa")), shell=True)
     call("sed '/##FASTA/q' {file} | grep -v '^# ' >> {ass}".format(file = pjoin(out_folder, "bins", file, file +".gff"), ass = pjoin(out_folder,  binset_name + ".gff")), shell=True)
 
 title2log("Binsetting done", logfile)
 
-shutil.rmtree(temp_folder)
+#shutil.rmtree(temp_folder)

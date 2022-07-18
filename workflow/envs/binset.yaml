@@ -1,26 +1,26 @@
-name: binsets
+name: binsets2
 channels:
   - conda-forge
   - bioconda
   - defaults
   - etetoolkit
 dependencies:
-  - python ==3.6*
+  - python==3.7*
   - checkm-genome
   - tqdm
   - biopython
-  - prokka=1.13.4
-  - pandas==0.25.1
+  - prokka
+  - pandas >=1.2.1
   - gffutils
   - numpy
   - bottle
   - pysam
   - ete3
   - scipy
-  - scikit-learn >=0.23.2
-  - django
+  - scikit-learn
+  - django=3
   - requests
-  - psutil ==5.4.3
+  - psutil
   - mistune
   - six
   - matplotlib-base
@@ -29,23 +29,22 @@ dependencies:
   - illumina-utils
   - tabulate
   - numba
-  - sqlite >=3.31.1
+  - sqlite
   - paste
   - vmatch
-  - pyani ==0.2.10
-  - snakemake-minimal ==5.10.0
+  - pyani
+  - snakemake-minimal
   - prodigal
   - mcl
   - muscle
   - hmmer
   - diamond
-  - blast==2.7.1
+  - blast
   - megahit
   - spades
   - bowtie2
   - bwa
   - samtools
-  - centrifuge
   - iqtree
   - trimal
   - fastani
@@ -58,14 +57,21 @@ dependencies:
   - bioconductor-qvalue
   - fasttree
   - vmatch
-  - snakemake==5.10.0
-  - tabulate==0.8.9
-  - Django==3.2.6
-  - ete3==3.1.2
-  - numpy==1.19.5
-  - nbformat==5.1.3
-  - jsonschema==3.2.0
-  - charset-normalizer==2.0.0
-  - sqlparse==0.4.1
-  - jupyter_core==4.7.1
-  - motulizer==0.3.1
+  - snakemake
+  - tabulate
+  - Django
+  - ete3
+  - numpy
+  - nbformat
+  - jsonschema
+  - charset-normalizer
+  - sqlparse
+  - jupyter_core
+  - motulizer
+  - cython
+  - plotext
+  - multiprocess
+  - matplotlib==3.5.2
+  - backports.zoneinfo
+  - importlib-resources
+  - plotext

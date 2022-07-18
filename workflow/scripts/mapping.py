@@ -28,6 +28,7 @@ binset = config_file['mappings'][mapping_name]['binset']
 taxfield = config_file['mappings'][mapping_name]['taxfield']
 precluster = config_file['mappings'][mapping_name]['precluster']
 keep_mapped = config_file['mappings'][mapping_name]['keep_mapped']
+keep_unmapped = config_file['mappings'][mapping_name]['keep_unmapped']
 
 alternate_root = config_file['mappings'][mapping_name]['alternate_root']
 ani = config_file['mappings'][mapping_name]['min_nucleotide_id']
@@ -51,12 +52,13 @@ seqid = 0.95
 cov = 0.9
 covmode = 2
 if precluster:
-    call(f"mmseqs easy-cluster --min-seq-id {seqid} --cov-mode {covmode} -c {cov} --threads {threads} {temp_folder}/binset.fna {temp_folder}/binset {temp_folder}/mmseqs_temp #> {logfile}", shell=True)
+    call(f"mmseqs easy-cluster --min-seq-id {seqid} --cov-mode {covmode} -c {cov} --threads {threads} {temp_folder}/binset.fna {temp_folder}/binset {temp_folder}/mmseqs_temp > {logfile}", shell=True)
 
 
 title2log("indexing binset to temp_folder", logfile)
 if method == "bwa-mem2":
-    call("bwa-mem2 index {temp}/binset.fna >> {out_folder}/logs/mapping.log  2>&1".format(temp = temp_folder, threads = threads, out_folder = out_folder), shell=True)
+#    call("bwa-mem2 index {temp}/binset.fna >> {out_folder}/logs/mapping.log  2>&1".format(temp = temp_folder, threads = threads, out_folder = out_folder), shell=True)
+    pass
 if method == "bowtie2":
     call(f"bowtie2-build --threads {threads} {temp_folder}/binset.fna {temp_folder}/binset.fna", shell=True)
 if method == "bbmap.sh":
@@ -66,6 +68,7 @@ if method == "minimap2":
 
 freetxt_line("Starting mappings", logfile)
 if os.path.exists(f"{temp_folder}/coverages.json"):
+    title2log("loading existing coverage json", logfile)
     with open(f"{temp_folder}/coverages.json") as handle:
         tt = json.load(handle)
     coverages = tt['coverages']
@@ -124,6 +127,9 @@ for lib in config_file['mappings'][mapping_name]['libraries']:
         if keep_mapped:
             title2log("extracting mapped reads from  {lib}".format(lib = lib), logfile)
             call(f"samtools fastq -@ {threads} {temp_folder}/mapping_filtered.bam -o {temp_folder}/{lib}.fastq  2>> {out_folder}/logs/mapping.log", shell=True)
+        if keep_unmapped:
+            title2log("extracting mapped reads from  {lib}".format(lib = lib), logfile)
+            call(f"samtools fastq -f 4 -@ {threads} {temp_folder}/mapping_filtered.bam -o {temp_folder}/{lib}.fastq  2>> {out_folder}/logs/mapping.log", shell=True)
         call("""
         rm {temp}/mapping_filtered.bam
         cat {temp}/fwd.fastq {temp}/rev.fastq {temp}/unp.fastq | wc -l > {temp}/total_reads_x4.txt
@@ -158,7 +164,7 @@ if not is_rna :
         coverages[k]['unmapped'] = total_reads[k] - sum(coverages[k].values())
 
 with open(pjoin(temp_folder, "total_reads_to_map.csv"), "w") as handle:
-    handle.writelines(["library,total_reads"] + [f"{k},{v}\n" for k,v in total_reads.items()])
+    handle.writelines(["library,total_reads\n"] + [f"{k},{v}\n" for k,v in total_reads.items()])
 
 coverages = pandas.DataFrame.from_dict(coverages)
 coverages.to_csv(pjoin(temp_folder, "contigs_mapped_reads.csv"), index_label = "contig_name")

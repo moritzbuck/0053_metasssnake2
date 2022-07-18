@@ -28,13 +28,13 @@ os.makedirs(pjoin(temp_folder, "bins") , exist_ok = True)
 for bin_ in tqdm(os.listdir(pjoin(out_folder, "bins"))):
     shutil.copyfile(pjoin(out_folder, "bins", bin_, bin_ + ".fna"), pjoin(temp_folder, "bins", bin_ + ".fna"))
 
-call(f"gtdbtk classify_wf --out_dir {temp_folder}/gtdbtk --genome_dir {temp_folder}/bins/ -x fna --cpus {threads} --scratch_dir {temp_folder} --pplacer_cpus {threads} >> {logfile}", shell = True)
+call(f"gtdbtk classify_wf --out_dir {temp_folder}/gtdbtk --genome_dir {temp_folder}/bins/ -x fna --cpus {threads}  >> {logfile}", shell = True)
 
-classif = csv2dict(f"{temp_folder}/gtdbtk/gtdbtk.ar122.summary.tsv", sep = "\t")
+classif = csv2dict(f"{temp_folder}/gtdbtk/gtdbtk.ar53.summary.tsv", sep = "\t")
 classif.update(csv2dict(f"{temp_folder}/gtdbtk/gtdbtk.bac120.summary.tsv", sep = "\t"))
 
 binset_stats = csv2dict(pjoin(root_folder, "binsets", binset_name, binset_name + "_basics.csv"))
-cleanz = {k : {'gtdbtk_classif' : v['classification'], 'gtdbtk_notes' : ";".join([ field + "=" + v[field].replace(" ","_") for field in ['note','classification_method','warnings'] if v[field] != "N/A"]), 'translation_table' : v["translation_table"]} for k,v in classif.items()}
+cleanz = {k : {'gtdbtk_classif' : v['classification'], 'gtdbtk_notes' : ";".join([ field + "=" + v[field].replace(" ","_").replace(",","_") for field in ['note','classification_method','warnings'] if v[field] != "N/A"]), 'translation_table' : v["translation_table"]} for k,v in classif.items()}
 
 for k,v in cleanz.items():
     binset_stats[k].update(v)

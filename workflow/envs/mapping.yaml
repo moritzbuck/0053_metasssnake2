@@ -13,3 +13,4 @@ dependencies:
   - minimap2
   - bowtie2
   - bbmap
+  - mmseqs2

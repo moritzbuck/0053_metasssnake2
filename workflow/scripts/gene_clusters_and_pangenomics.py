@@ -338,8 +338,8 @@ for k, inter in inter_sizes.items():
         inter_by_small_size[motu2] = {}
 
     if union_sizes[k] == 0 :
-        jaccard_index[motu1] = 0
-        jaccard_index[motu2] = 0
+        jaccard_index[motu1][motu2] = 0
+        jaccard_index[motu2][motu1] = 0
     else :
         jaccard_index[motu2][motu1] = inter/union_sizes[k]
         jaccard_index[motu1][motu2] = inter/union_sizes[k]
@@ -352,7 +352,7 @@ orderz = sorted(motu_kegg_inter_by_small.columns)
 
 motu_kegg_inter_by_small.loc[orderz,orderz].to_csv(pjoin(temp_folder, "motu_kegg_inter_by_small.csv"))
 motu_kegg_jaccard.loc[orderz,orderz].to_csv(pjoin(temp_folder, "motu_kegg_jaccard.csv"))
-motu_stats = {v['mOTU'] : v for k,v in binset_stats.items() if k == v['representative']}
+motu_stats = {v['mOTU'] : v for k,v in bindat.items() if k == v['representative']}
 for k in motu_stats:
     if k in gc_pangenome_stats:
         keys = ['core_length','nb_bootstraps', 'fpr', 'sd_fpr', 'lowest_false', 'sd_lowest_false', 'core', 'accessory']

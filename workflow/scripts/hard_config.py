@@ -161,6 +161,10 @@ binsets_fields =  {
     'type' : str,
     'default' : ""
     },
+    'motulize' : {
+    'type' : bool,
+    'default' : True
+    },
     'additional_annotation' : {
         'type' : str,
         'default' : "",
@@ -193,6 +197,10 @@ mappings_fields =  {
         'default' : False
     },
     'keep_mapped' : {
+        'type' : bool,
+        'default' : False
+    },
+    'keep_unmapped' : {
         'type' : bool,
         'default' : False
     },
