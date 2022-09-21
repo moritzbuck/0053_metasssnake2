@@ -156,10 +156,10 @@ if binnings != [] or external_bins != "":
                     buffer = []
             SeqIO.write(buffer, handle, "fasta")
         shutil.move(pjoin(temp_folder, "clean_bins", binset_name + "_unkept2.fna"),pjoin(temp_folder, "clean_bins", binset_name + "_unkept.fna"))
-#        call("prokka --outdir {temp}/clean_bins/{binset}_unkept --prefix {binset}_unkept --locustag {binset}_unkept --metagenome --cpus {threads} {temp}/clean_bins/{binset}_unkept.fna >> {logfile}  2>&1".format(threads= threads, binset = binset_name, temp=temp_folder, logfile = logfile), shell=True)
+        call("prokka --outdir {temp}/clean_bins/{binset}_unkept --prefix {binset}_unkept --locustag {binset}_unkept --metagenome --cpus {threads} {temp}/clean_bins/{binset}_unkept.fna >> {logfile}  2>&1".format(threads= threads, binset = binset_name, temp=temp_folder, logfile = logfile), shell=True)
         os.remove(pjoin(cbinfoder, binset_name + "_unkept.fna"))
 
-#    call("ls {temp}/bins/ | rev | cut -f2- -d. | rev | parallel -j{threads} prokka --outdir {temp}/clean_bins/{{}} --prefix {{}} --locustag {{}} --metagenome --cpus 1 {temp}/bins/{{}}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder), shell = True)
+    call("ls {temp}/bins/ | rev | cut -f2- -d. | rev | parallel -j{threads} prokka --outdir {temp}/clean_bins/{{}} --prefix {{}} --locustag {{}} --metagenome --cpus 1 {temp}/bins/{{}}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder), shell = True)
     to_redo = []
     for bin_ in os.listdir(f"{temp_folder}/clean_bins/"):
         if not os.path.exists(f"{temp_folder}/clean_bins/{bin_}/{bin_}.gff"):
@@ -167,8 +167,8 @@ if binnings != [] or external_bins != "":
 
     title2log(f"have to rerun {len(to_redo)} prokkas for unknown reasons", logfile)
 
-#    for f in tqdm(to_redo):
-#        call("prokka --force --outdir {temp}/clean_bins/{f} --prefix {f} --locustag {f} --cpus {threads} {temp}/bins/{f}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder, f = f), shell = True)
+    for f in tqdm(to_redo):
+        call("prokka --force --outdir {temp}/clean_bins/{f} --prefix {f} --locustag {f} --cpus {threads} {temp}/bins/{f}.fna >> {logfile}  2>&1".format(logfile = logfile, threads= threads, temp=temp_folder, f = f), shell = True)
 
 
     title2log("Creating anvi'o databases", logfile)

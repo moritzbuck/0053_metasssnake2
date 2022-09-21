@@ -5,7 +5,7 @@ channels:
   - defaults
   - etetoolkit
 dependencies:
-  - python==3.7*
+  - python==3.8*
   - checkm-genome
   - tqdm
   - biopython
