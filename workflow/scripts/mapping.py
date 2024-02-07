@@ -68,6 +68,7 @@ if method == "minimap2":
 
 freetxt_line("Starting mappings", logfile)
 if os.path.exists(f"{temp_folder}/coverages.json"):
+
     title2log("loading existing coverage json", logfile)
     with open(f"{temp_folder}/coverages.json") as handle:
         tt = json.load(handle)
