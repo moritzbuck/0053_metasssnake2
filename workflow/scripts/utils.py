@@ -76,6 +76,7 @@ def generate_config(file_or_dict):
     else :
         config_dat = file_or_dict
     try :
+        assert 'temp_folder' in config_dat, "you need a temp_folder in your config_dat"
         if config_dat['temp_folder'].startswith("$"):
             assert config_dat['temp_folder'][1:] in os.environ, "The env-variable " + config_dat['temp_folder'] + " you picked for temp folder does not exist"
             config_dat['temp_folder'] = os.environ[config_dat['temp_folder'][1:]]
@@ -164,6 +165,7 @@ def generate_config(file_or_dict):
         return None
     except Exception as err:
         print("ERROR : Something unexpected went wrong, so your probably not valid\nERROR {err}\nERROR Check the doc for formating advice".format(err = err), file = sys.stderr)
+        print(err, file = stderr)
         return None
 
     config_dat['version'] = __version__

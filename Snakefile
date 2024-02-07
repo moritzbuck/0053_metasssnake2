@@ -26,3 +26,6 @@ rule all_binnings :
 
 rule all_binsets :
     input : expand(pjoin(config['root_folder'], "binsets/{binni_name}/{binni_name}.fna"), binni_name = config['binsets'].keys())
+
+rule all_submappings :
+    input : expand(pjoin(config['root_folder'], "mappings/{name}/contigs_relative_abundance.csv"), name = [n for n in config['mappings'].keys() if "batch2-" in n])

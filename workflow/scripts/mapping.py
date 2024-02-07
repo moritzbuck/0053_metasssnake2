@@ -57,7 +57,7 @@ if precluster:
 
 title2log("indexing binset to temp_folder", logfile)
 if method == "bwa-mem2":
-#    call("bwa-mem2 index {temp}/binset.fna >> {out_folder}/logs/mapping.log  2>&1".format(temp = temp_folder, threads = threads, out_folder = out_folder), shell=True)
+    call("bwa-mem2 index {temp}/binset.fna >> {out_folder}/logs/mapping.log  2>&1".format(temp = temp_folder, threads = threads, out_folder = out_folder), shell=True)
     pass
 if method == "bowtie2":
     call(f"bowtie2-build --threads {threads} {temp_folder}/binset.fna {temp_folder}/binset.fna", shell=True)

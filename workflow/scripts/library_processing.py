@@ -164,12 +164,10 @@ else :
 title2log("Read sketching", logfile)
 
 sourmash_line = """
-sourmash sketch dna -p k={k},abund,scaled={scale}  --merge {lname} {temp}/fwd.fastq {temp}/rev.fastq {temp}/unp.fastq -o {temp}/{lname}.sig   2>> {log}
+sourmash sketch dna -p k={k},abund,scaled={scale}  -o {temp}/{lname}.sig  --merge {lname} {temp}/fwd.fastq {temp}/rev.fastq {temp}/unp.fastq   2>> {log}
 """
 
 call(sourmash_line.format(k = config_file['libraries'][lib_name]['sourmash_k'], scale = config_file['libraries'][lib_name]['sourmash_scaled'], lname = lib_name, temp = temp_folder, threads = threads, log = pjoin(out_folder,  "logs/sourmash_compute.log")), shell=True)
-with open("{temp}/{lname}.sig".format(temp = temp_folder, lname = lib_name) , "w") as handle:
-    pass
 
 title2log("zipping things and moving back", logfile)
 
@@ -189,6 +187,7 @@ if rna:
     '{temp}/mrna_rev.fastq',
     '{temp}/rrna_unp.fastq',
     '{temp}/mrna_unp.fastq',
+    '{temp}/{lname}.sig',
     ]
 
 to_gz = [g.format(temp = temp_folder, lname = lib_name) for g in to_gz]
@@ -225,6 +224,7 @@ if rna:
     '{temp}/{lname}_mrna_rev.fastq.gz',
     '{temp}/{lname}_rrna_unp.fastq.gz',
     '{temp}/{lname}_mrna_unp.fastq.gz',
+    '{temp}/{lname}.sig.gz'
     ]
 
 
