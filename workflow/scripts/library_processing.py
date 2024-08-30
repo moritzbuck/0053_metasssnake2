@@ -139,42 +139,34 @@ if rna == True:
 
 title2log("Read subsetting", logfile)
 
-read_proc_line = """
+if not os.path.exists(f"{out_folder}/subs/subs_{lib_name}_fwd.fastq"):
+    read_proc_line = """
 reformat.sh {in_reads} {out_reads} samplereadstarget={subcount} sampleseed=42 t={threads}  2>> {log}
 """
-
-if only_singles:
-    inreads = "in={temp}/unp.fastq".format(temp = temp_folder)
-    outreads = "out={temp}/subs/subs_{lname}_unp.fastq".format(temp = temp_folder, lname = lib_name)
-    call(read_proc_line.format(in_reads = inreads, out_reads = outreads, subcount = config_file['libraries_config']['read_subset'], threads = threads, log = pjoin(out_folder,  "logs/bbtools_reformat.log")), shell=True)
-    with open("{temp}/subs/subs_{lname}_fwd.fastq".format(temp = temp_folder, lname = lib_name), "w") as handle:
-        pass
-    with open("{temp}/subs/subs_{lname}_rev.fastq".format(temp = temp_folder, lname = lib_name), "w") as handle:
-        pass
-else :
-    unp_ratio = unpaired_size/(unpaired_size+paired_size)
-    inreads = "in={temp}/unp.fastq".format(temp = temp_folder)
-    outreads = "out={temp}/subs/subs_{lname}_unp.fastq".format(temp = temp_folder, lname = lib_name)
-    call(read_proc_line.format(in_reads = inreads, out_reads = outreads, subcount = int(config_file['libraries'][lib_name]['read_subset']*unp_ratio), threads = threads, log = pjoin(out_folder,  "logs/bbtools_reformat.log")), shell=True)
-
-    inreads = "in={temp}/fwd.fastq in2={temp}/rev.fastq ".format(temp = temp_folder)
-    outreads = "out={temp}/subs/subs_{lname}_fwd.fastq out2={temp}/subs/subs_{lname}_rev.fastq ".format(temp = temp_folder, lname = lib_name )
-    call(read_proc_line.format(in_reads = inreads, out_reads = outreads, subcount = int(config_file['libraries'][lib_name]['read_subset']*(1-unp_ratio)), threads = threads, log = pjoin(out_folder,  "logs/bbtools_reformat.log")), shell=True)
+    if only_singles:
+        inreads = "in={temp}/unp.fastq".format(temp = temp_folder)
+        outreads = "out={temp}/subs/subs_{lname}_unp.fastq".format(temp = temp_folder, lname = lib_name)
+        call(read_proc_line.format(in_reads = inreads, out_reads = outreads, subcount = config_file['libraries_config']['read_subset'], threads = threads, log = pjoin(out_folder,  "logs/bbtools_reformat.log")), shell=True)
+        with open("{temp}/subs/subs_{lname}_fwd.fastq".format(temp = temp_folder, lname = lib_name), "w") as handle:
+           pass
+        with open("{temp}/subs/subs_{lname}_rev.fastq".format(temp = temp_folder, lname = lib_name), "w") as handle:
+            pass
+    else :
+        unp_ratio = unpaired_size/(unpaired_size+paired_size)
+        inreads = "in={temp}/unp.fastq".format(temp = temp_folder)
+        outreads = "out={temp}/subs/subs_{lname}_unp.fastq".format(temp = temp_folder, lname = lib_name)
+        call(read_proc_line.format(in_reads = inreads, out_reads = outreads, subcount = int(config_file['libraries'][lib_name]['read_subset']*unp_ratio), threads = threads, log = pjoin(out_folder,  "logs/bbtools_reformat.log")), shell=True)
+        inreads = "in={temp}/fwd.fastq in2={temp}/rev.fastq ".format(temp = temp_folder)
+        outreads = "out={temp}/subs/subs_{lname}_fwd.fastq out2={temp}/subs/subs_{lname}_rev.fastq ".format(temp = temp_folder, lname = lib_name )
+        call(read_proc_line.format(in_reads = inreads, out_reads = outreads, subcount = int(config_file['libraries'][lib_name]['read_subset']*(1-unp_ratio)), threads = threads, log = pjoin(out_folder,  "logs/bbtools_reformat.log")), shell=True)
+else : 
+    freetxt_line("Subsets of reads already computed, no need to repeat" , logfile)
 
 title2log("Read sketching", logfile)
-
-sourmash_line = """
-sourmash sketch dna -p k={k},abund,scaled={scale}  -o {temp}/{lname}.sig  --merge {lname} {temp}/fwd.fastq {temp}/rev.fastq {temp}/unp.fastq   2>> {log}
-"""
-
-call(sourmash_line.format(k = config_file['libraries'][lib_name]['sourmash_k'], scale = config_file['libraries'][lib_name]['sourmash_scaled'], lname = lib_name, temp = temp_folder, threads = threads, log = pjoin(out_folder,  "logs/sourmash_compute.log")), shell=True)
-
-title2log("zipping things and moving back", logfile)
 
 to_gz = ['{temp}/fwd.fastq',
          '{temp}/rev.fastq',
          '{temp}/unp.fastq',
-         '{temp}/{lname}.sig',
          '{temp}/subs/subs_{lname}_unp.fastq',
          '{temp}/subs/subs_{lname}_fwd.fastq',
          '{temp}/subs/subs_{lname}_rev.fastq',
@@ -187,8 +179,36 @@ if rna:
     '{temp}/mrna_rev.fastq',
     '{temp}/rrna_unp.fastq',
     '{temp}/mrna_unp.fastq',
-    '{temp}/{lname}.sig',
     ]
+
+to_move = ['{temp}/{lname}_fwd.fastq.gz',
+         '{temp}/{lname}_rev.fastq.gz',
+         '{temp}/{lname}_unp.fastq.gz',
+         ]
+
+if rna:
+    to_move += ['{temp}/{lname}_rrna_fwd.fastq.gz',
+    '{temp}/{lname}_mrna_fwd.fastq.gz',
+    '{temp}/{lname}_rrna_rev.fastq.gz',
+    '{temp}/{lname}_mrna_rev.fastq.gz',
+    '{temp}/{lname}_rrna_unp.fastq.gz',
+    '{temp}/{lname}_mrna_unp.fastq.gz',
+
+    ]
+
+
+if not os.path.exists(f"{out_folder}/{lib_name}.sig.gz"):
+   sourmash_line = """
+sourmash sketch dna -p k={k},abund,scaled={scale}  -o {temp}/{lname}.sig  --merge {lname} {temp}/fwd.fastq {temp}/rev.fastq {temp}/unp.fastq   2>> {log}
+"""
+   call(sourmash_line.format(k = config_file['libraries'][lib_name]['sourmash_k'], scale = config_file['libraries'][lib_name]['sourmash_scaled'], lname = lib_name, temp = temp_folder, threads = threads, log = pjoin(out_folder,  "logs/sourmash_compute.log")), shell=True)
+   to_gz += ['{temp}/{lname}.sig']
+   to_move += ['{temp}/{lname}.sig.gz']
+else :
+    freetxt_line("Sig already computed, no need to repeat" , logfile)
+
+title2log("zipping things and moving back", logfile)
+
 
 to_gz = [g.format(temp = temp_folder, lname = lib_name) for g in to_gz]
 
@@ -208,32 +228,17 @@ if rna:
     'mrna_unp.fastq.gz',
     ]
 
+
 for f in to_rename:
     shutil.move(pjoin(temp_folder, f), pjoin(temp_folder, lib_name + "_" + f))
-
-to_move = ['{temp}/{lname}_fwd.fastq.gz',
-         '{temp}/{lname}_rev.fastq.gz',
-         '{temp}/{lname}_unp.fastq.gz',
-         '{temp}/{lname}.sig.gz'
-         ]
-
-if rna:
-    to_move += ['{temp}/{lname}_rrna_fwd.fastq.gz',
-    '{temp}/{lname}_mrna_fwd.fastq.gz',
-    '{temp}/{lname}_rrna_rev.fastq.gz',
-    '{temp}/{lname}_mrna_rev.fastq.gz',
-    '{temp}/{lname}_rrna_unp.fastq.gz',
-    '{temp}/{lname}_mrna_unp.fastq.gz',
-    '{temp}/{lname}.sig.gz'
-    ]
-
 
 to_move = [g.format(temp = temp_folder, lname = lib_name) for g in to_move]
 
 for f in to_move:
     shutil.move(f, out_folder )
 
-for f in os.listdir(pjoin(temp_folder, "subs")):
-    shutil.move(pjoin(temp_folder, "subs", f), pjoin(out_folder, "subs", f))
+if os.path.exists(pjoin(temp_folder, "subs")):
+    for f in os.listdir(pjoin(temp_folder, "subs")):
+        shutil.move(pjoin(temp_folder, "subs", f), pjoin(out_folder, "subs", f))
 
 shutil.rmtree(temp_folder)

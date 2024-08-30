@@ -18,9 +18,15 @@ rule library_processing:
         log = "{root}/libraries/{lib_name}/logs/{lib_name}.log",
         env = "{root}/libraries/{lib_name}/logs/library_processing.yaml",
         settings = "{root}/libraries/{lib_name}/settings/library_processing_settings.json"
-    threads : 24
+    threads : 128
     params : script = "workflow/scripts/library_processing.py", config_file = pjoin(config['root_folder'],config['config_file'])
     conda : "../envs/library_processing.yaml"
+    resources:
+        runtime=1400,
+        cpus_per_task=16,
+        mem_gb=32,
+        mem_mb=32000,
+        slurm_partition="shared"
     shell : """
         python {params.script} {wildcards.lib_name} {params.config_file} {wildcards.root} {wildcards.root}/libraries/{wildcards.lib_name}/ {threads}
         """
@@ -60,8 +66,13 @@ rule assembly:
         log = "{root}/assemblies/{ass_name}/logs/{ass_name}.log",
         env = "{root}/assemblies/{ass_name}/logs/assembly.yaml",
         settings = "{root}/assemblies/{ass_name}/logs/assembly_settings.json"
-    threads : 24
+    threads : 256
     params : script = "workflow/scripts/assemble.py", config_file = pjoin(config['root_folder'],config['config_file'])
+    resources:
+        runtime=5000,
+        cpus_per_task=256,
+       	mem_mb=256000,
+        slurm_partition="long"
     conda : "../envs/assembly.yaml"
     shell : """
         python {params.script} {wildcards.ass_name} {params.config_file} {wildcards.root} {wildcards.root}/assemblies/{wildcards.ass_name}/ {threads}
