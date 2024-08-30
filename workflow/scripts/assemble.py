@@ -59,7 +59,7 @@ if config_file['assemblies'][ass_name]['assembler'] == 'megahit':
     else :
         unp = ""
     title2log("Running megahit".format(ass_name = ass_name), logfile)
-    megahit_line = "megahit -m 0.9 -1 {temp}/fwd.fastq.gz -2 {temp}/rev.fastq.gz " + unp + "-t {threads} -o {temp}/assembly --min-contig-len {min_len} 2> {log}"
+    megahit_line = "megahit --continue -m 0.9 -1 {temp}/fwd.fastq.gz -2 {temp}/rev.fastq.gz " + unp + "-t {threads} -o {temp}/assembly --min-contig-len {min_len} 2> {log}"
 
 
     title2log("assembling {ass_name}".format(ass_name = ass_name), logfile)
@@ -69,7 +69,7 @@ if config_file['assemblies'][ass_name]['assembler'] == 'megahit':
     nb_contigs = len([ None for s in tqdm(SeqIO.parse(pjoin(temp_folder, "assembly", "final.contigs.fa"), "fasta"))])
     max_buffer_size = config_file['seqio_buffer_size']
     zeros = len(str(nb_contigs))
-    call(f"megahit_toolkit contig2fastg 151 {temp_folder}/assembly/intermediate_contigs/k141.contigs.fa > {out_folder}/{assembly.fastg}", shell = True)
+    call(f"megahit_toolkit contig2fastg 151 {temp_folder}/assembly/intermediate_contigs/k141.contigs.fa > {out_folder}/assembly.fastg", shell = True)
     buffer = []
     with open(pjoin(out_folder, "assembly.fna"), "w") as handle:
         for i,s in tqdm(enumerate(SeqIO.parse(pjoin(temp_folder, "assembly", "final.contigs.fa"), "fasta"))):
