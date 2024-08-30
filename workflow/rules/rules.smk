@@ -83,6 +83,7 @@ rule binning:
         python {params.script} {wildcards.binning_name} {params.config_file} {wildcards.root} {wildcards.root}/binnings/{wildcards.binning_name}/ {threads}
         """
 
+
 def get_binnings_and_sets(wildcards):
     binings = [] if config['binsets'][wildcards.binset_name]['binnings'] == "" else ["{root}/binnings/{binning}/binned_assembly.fna".format(root = wildcards.root, binning = binning) for binning in config['binsets'][wildcards.binset_name]['binnings'] ]
     binsets = [] if config['binsets'][wildcards.binset_name]['binsets'] == "" else ["{root}/binsets/{binset}/{binset}.fna".format(root = wildcards.root, binset = binset) for binset in config['binsets'][wildcards.binset_name]['binsets'] ]
