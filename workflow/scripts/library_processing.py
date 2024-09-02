@@ -100,8 +100,6 @@ with open(pjoin(out_folder, "stats/fastp_{lib_name}.stats".format(lib_name = lib
 
 
 
-
-
 if not os.path.exists(pjoin(temp_folder, "fwd.fastq")):
     only_singles = True
     paired_size = 0
@@ -117,8 +115,8 @@ if rna == True:
         title2log("running sortmeRNA on pairs", logfile)
 
         call(f"""
-        sortmerna --task 4 --out2 --threads {threads} {refs}  --reads {temp_folder}/fwd.fastq --reads {temp_folder}/rev.fastq --workdir {temp_folder}/smrna_paired/  -num_alignments 1 -v --fastx  --aligned --other > {logfile} 2>&1
-        repair.sh in={temp_folder}/fwd.fastq in2={temp_folder}/rev.fastq out={temp_folder}/fwd_fixed.fastq out2={temp_folder}/rev_fixed.fastq t={threads} > {logfile} 2>&1
+        sortmerna --task 4 --out2 --threads {threads} {refs}  --reads {temp_folder}/fwd.fastq --reads {temp_folder}/rev.fastq --workdir {temp_folder}/smrna_paired/  -num_alignments 1 -v --fastx  --aligned --other >> {logfile} 2>&1
+        repair.sh in={temp_folder}/fwd.fastq in2={temp_folder}/rev.fastq out={temp_folder}/fwd_fixed.fastq out2={temp_folder}/rev_fixed.fastq t={threads} >> {logfile} 2>&1
         mv {temp_folder}/fwd_fixed.fastq {temp_folder}/fwd.fastq
         mv {temp_folder}/rev_fixed.fastq {temp_folder}/rev.fastq
         """, shell=True)
