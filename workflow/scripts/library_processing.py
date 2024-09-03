@@ -235,8 +235,7 @@ to_move = [g.format(temp = temp_folder, lname = lib_name) for g in to_move]
 for f in to_move:
     shutil.move(f, out_folder )
 
-if os.path.exists(pjoin(temp_folder, "subs")):
-    for f in os.listdir(pjoin(temp_folder, "subs")):
-        shutil.move(pjoin(temp_folder, "subs", f), pjoin(out_folder, "subs", f))
+for f in os.listdir(pjoin(temp_folder, "subs")):
+    shutil.move(pjoin(temp_folder, "subs", f), pjoin(out_folder, "subs", f))
 
 shutil.rmtree(temp_folder)
