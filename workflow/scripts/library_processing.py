@@ -115,7 +115,7 @@ if rna == True:
         title2log("running sortmeRNA on pairs", logfile)
 
         call(f"""
-        sortmerna --task 4 --out2 --threads {threads} {refs}  --reads {temp_folder}/fwd.fastq --reads {temp_folder}/rev.fastq --workdir {temp_folder}/smrna_paired/  -num_alignments 1 -v --fastx  --aligned --other >> {logfile} 2>&1
+        sortmerna -m 2000 --task 2 --out2 --threads {threads} {refs}  --reads {temp_folder}/fwd.fastq --reads {temp_folder}/rev.fastq --workdir {temp_folder}/smrna_paired/  -num_alignments 1 -v --fastx  --aligned --other >> {logfile} 2>&1
         repair.sh in={temp_folder}/fwd.fastq in2={temp_folder}/rev.fastq out={temp_folder}/fwd_fixed.fastq out2={temp_folder}/rev_fixed.fastq t={threads} >> {logfile} 2>&1
         mv {temp_folder}/fwd_fixed.fastq {temp_folder}/fwd.fastq
         mv {temp_folder}/rev_fixed.fastq {temp_folder}/rev.fastq
@@ -127,7 +127,7 @@ if rna == True:
         shutil.move(pjoin(temp_folder, "smrna_paired","out","aligned.log") , pjoin(out_folder, "stats", "sortmerna_" + lib_name + "_paired.stats") )
 
     call(f"""
-    sortmerna --task 4  --threads {threads} {refs}  --reads {temp_folder}/unp.fastq --workdir {temp_folder}/smrna_unpaired/  -num_alignments 1 -v --fastx --threads {threads} --aligned  --other >> {logfile} 2>&1
+    sortmerna  -m 64000  --task 2  --threads {threads} {refs}  --reads {temp_folder}/unp.fastq --workdir {temp_folder}/smrna_unpaired/  -num_alignments 1 -v --fastx --threads {threads} --aligned  --other >> {logfile} 2>&1
     """, shell=True)
     shutil.move(pjoin(temp_folder, "smrna_unpaired","out","aligned.fq") , pjoin(temp_folder, "rrna_unp.fastq") )
     shutil.move(pjoin(temp_folder, "smrna_unpaired","out","other.fq") , pjoin(temp_folder, "mrna_unp.fastq") )

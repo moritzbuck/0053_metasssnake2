@@ -18,7 +18,7 @@ rule library_processing:
         log = "{root}/libraries/{lib_name}/logs/{lib_name}.log",
         env = "{root}/libraries/{lib_name}/logs/library_processing.yaml",
         settings = "{root}/libraries/{lib_name}/settings/library_processing_settings.json"
-    threads : 128
+    threads : 16
     params : script = "workflow/scripts/library_processing.py", config_file = pjoin(config['root_folder'],config['config_file'])
     conda : "../envs/library_processing.yaml"
     resources:

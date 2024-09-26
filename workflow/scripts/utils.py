@@ -164,7 +164,8 @@ def generate_config(file_or_dict):
         print("ERROR : config not valid\nERROR {err}\nERROR Check the doc for formating advice".format(err = err), file = sys.stderr)
         return None
     except Exception as err:
-        print("ERROR : Something unexpected went wrong, so your probably not valid\nERROR {err}\nERROR Check the doc for formating advice".format(err = err), file = sys.stderr)
+        import traceback
+        print("ERROR : Something unexpected went wrong, so your probably not valid\nERROR {err}\n{trace}\nERROR Check the doc for formating advice".format(err = err, trace = traceback.format_exc()), file = sys.stderr)
         print(err, file = stderr)
         return None
 
