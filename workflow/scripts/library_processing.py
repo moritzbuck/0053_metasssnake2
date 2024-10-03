@@ -146,7 +146,7 @@ if rna == True:
             i = i+1
             title2log(f"running sortmerna on block {i}/{block_id}", logfile)
             call(f"""
-#        sortmerna -m 2000 --task 4 --out2 --threads {threads} {refs}  --reads {temp_folder}/fwd_{i}.fastq --reads {temp_folder}/rev_{i}.fastq --workdir {temp_folder}/smrna_paired_{i}/  -num_alignments 1 -v --fastx  --aligned --other >> {logfile} 2>&1
+        sortmerna -m 2000 --task 4 --out2 --threads {threads} {refs}  --reads {temp_folder}/fwd_{i}.fastq --reads {temp_folder}/rev_{i}.fastq --workdir {temp_folder}/smrna_paired_{i}/  -num_alignments 1 -v --fastx  --aligned --other >> {logfile} 2>&1
         """, shell=True)
         call(f"""
         cat {temp_folder}/smrna_paired_[0-9]*/out/aligned_fwd.fq > {temp_folder}/rrna_fwd.fastq
