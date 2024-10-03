@@ -8,6 +8,7 @@ import shutil
 from subprocess import call
 from os.path import basename
 import json
+from Bio import SeqIO
 
 script , lib_name, config_file, root_folder, out_folder, threads = sys.argv
 
@@ -113,25 +114,57 @@ if rna == True:
 
     if not only_singles:
         title2log("running sortmeRNA on pairs", logfile)
+        FASTQ_BLOCK_SIZE = 10_000_000*4
+        block_id = 1
+        fwd_block = []
+        rev_block = []
+        current_size = 0
+        rev_handle = open(f"{temp_folder}/rev.fastq")
+        fwd_handle = open(f"{temp_folder}/fwd.fastq") 
+        for fwd, rev in tqdm(zip(fwd_handle, rev_handle)):
+            fwd_block += [fwd]
+            rev_block += [rev]
+            current_size += 1
+            if current_size == FASTQ_BLOCK_SIZE:
+                title2log(f"writing block {block_id}", logfile)
+                print(f"writing block {block_id}")
+                with open(f"{temp_folder}/fwd_{block_id}.fastq", "w") as handle :
+                    handle.writelines(fwd_block)
+                with open(f"{temp_folder}/rev_{block_id}.fastq", "w") as handle :
+                    handle.writelines(rev_block)
+                block_id += 1
+                current_size = 0
+                fwd_block = []
+                rev_block = []
+        if len(fwd_block) > 0 :
+            with open(f"{temp_folder}/fwd_{block_id}.fastq", "w") as handle :
+                handle.writelines(fwd_block)
+            with open(f"{temp_folder}/rev_{block_id}.fastq", "w") as handle :
+                handle.writelines(rev_block)
 
-        call(f"""
-        sortmerna -m 2000 --task 2 --out2 --threads {threads} {refs}  --reads {temp_folder}/fwd.fastq --reads {temp_folder}/rev.fastq --workdir {temp_folder}/smrna_paired/  -num_alignments 1 -v --fastx  --aligned --other >> {logfile} 2>&1
-        repair.sh in={temp_folder}/fwd.fastq in2={temp_folder}/rev.fastq out={temp_folder}/fwd_fixed.fastq out2={temp_folder}/rev_fixed.fastq t={threads} >> {logfile} 2>&1
-        mv {temp_folder}/fwd_fixed.fastq {temp_folder}/fwd.fastq
-        mv {temp_folder}/rev_fixed.fastq {temp_folder}/rev.fastq
+        for i in range(block_id):
+            i = i+1
+            title2log(f"running sortmerna on block {i}/{block_id}", logfile)
+            call(f"""
+#        sortmerna -m 2000 --task 4 --out2 --threads {threads} {refs}  --reads {temp_folder}/fwd_{i}.fastq --reads {temp_folder}/rev_{i}.fastq --workdir {temp_folder}/smrna_paired_{i}/  -num_alignments 1 -v --fastx  --aligned --other >> {logfile} 2>&1
         """, shell=True)
-        shutil.move(pjoin(temp_folder, "smrna_paired", "out", "aligned_fwd.fq") , pjoin(temp_folder, "rrna_fwd.fastq") )
-        shutil.move(pjoin(temp_folder, "smrna_paired","out","aligned_rev.fq") , pjoin(temp_folder, "rrna_rev.fastq") )
-        shutil.move(pjoin(temp_folder, "smrna_paired","out","other_fwd.fq") , pjoin(temp_folder, "mrna_fwd.fastq") )
-        shutil.move(pjoin(temp_folder, "smrna_paired","out","other_rev.fq") , pjoin(temp_folder, "mrna_rev.fastq") )
-        shutil.move(pjoin(temp_folder, "smrna_paired","out","aligned.log") , pjoin(out_folder, "stats", "sortmerna_" + lib_name + "_paired.stats") )
+        call(f"""
+        cat {temp_folder}/smrna_paired_[0-9]*/out/aligned_fwd.fq > {temp_folder}/rrna_fwd.fastq
+        cat {temp_folder}/smrna_paired_[0-9]*/out/aligned_rev.fq > {temp_folder}/rrna_rev.fastq
+
+        cat {temp_folder}/smrna_paired_[0-9]*/out/other_fwd.fq > {temp_folder}/mrna_fwd.fastq
+        cat {temp_folder}/smrna_paired_[0-9]*/out/other_rev.fq > {temp_folder}/mrna_rev.fastq
+
+        cat {temp_folder}/smrna_paired_[0-9]*/out/aligned.log > {out_folder}/stats/sortmerna_{lib_name}_paired.stats
+        """, shell = True)
+#        shutil.move(pjoin(temp_folder, "smrna_paired","out","aligned.log") , pjoin(out_folder, "stats", "sortmerna_" + lib_name + "_paired.stats") )
 
     call(f"""
     sortmerna  -m 64000  --task 2  --threads {threads} {refs}  --reads {temp_folder}/unp.fastq --workdir {temp_folder}/smrna_unpaired/  -num_alignments 1 -v --fastx --threads {threads} --aligned  --other >> {logfile} 2>&1
     """, shell=True)
     shutil.move(pjoin(temp_folder, "smrna_unpaired","out","aligned.fq") , pjoin(temp_folder, "rrna_unp.fastq") )
     shutil.move(pjoin(temp_folder, "smrna_unpaired","out","other.fq") , pjoin(temp_folder, "mrna_unp.fastq") )
-    shutil.move(pjoin(temp_folder, "smrna_unpaired","out","aligned.log") , pjoin(out_folder, "stats", "sortmerna_" + lib_name + "_unpaired.stats") )
+#    shutil.move(pjoin(temp_folder, "smrna_unpaired","out","aligned.log") , pjoin(out_folder, "stats", "sortmerna_" + lib_name + "_unpaired.stats") )
 
     title2log("Cleaning up and moving".format(lib_name = lib_name), logfile)
 
@@ -233,9 +266,13 @@ for f in to_rename:
 to_move = [g.format(temp = temp_folder, lname = lib_name) for g in to_move]
 
 for f in to_move:
+    if os.path.exists(pjoin(out_folder, os.path.basename(f))):
+        os.remove( pjoin(out_folder, os.path.basename(f)) )
     shutil.move(f, out_folder )
 
 for f in os.listdir(pjoin(temp_folder, "subs")):
+    if os.path.exists( pjoin(out_folder, "subs", f)):
+        os.remove( pjoin(out_folder, "subs", f))
     shutil.move(pjoin(temp_folder, "subs", f), pjoin(out_folder, "subs", f))
 
 shutil.rmtree(temp_folder)
